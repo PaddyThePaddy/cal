@@ -14,6 +14,9 @@ lazy_static! {
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
   static ref HEX_REGEX1: Regex = Regex::new(r"(?i)0x([a-f0-9]+)").unwrap();
   static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-f0-9]+)(?-i)h").unwrap();
+  static ref BIN_REGEX1: Regex = Regex::new(r"(?i)0b([01]+)").unwrap();
+  static ref BIN_REGEX2: Regex = Regex::new(r"(?i)([01]+)(?-i)b").unwrap();
+  static ref OCT_REGEX: Regex = Regex::new(r"(?i)0([0-7]+)").unwrap();
 }
 
 const HELP_MSG: &str = r#"A cli calculator highly depends on crate https://github.com/ISibboI/evalexpr.
@@ -116,7 +119,7 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   let mut pre_end = 0;
   HEX_REGEX1.captures_iter(&result).for_each(|m| {
     new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u32::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
+    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
     new_str = format!("{}{}", new_str, int);
     pre_end = m.get(0).unwrap().end();
   });
@@ -127,7 +130,40 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   let mut pre_end = 0;
   HEX_REGEX2.captures_iter(&result).for_each(|m| {
     new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u32::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
+    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
+    new_str = format!("{}{}", new_str, int);
+    pre_end = m.get(0).unwrap().end();
+  });
+  new_str += &result[pre_end..];
+  result = new_str;
+
+  let mut new_str: String = String::new();
+  let mut pre_end = 0;
+  BIN_REGEX1.captures_iter(&result).for_each(|m| {
+    new_str += &result[pre_end..m.get(0).unwrap().start()];
+    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 2).unwrap();
+    new_str = format!("{}{}", new_str, int);
+    pre_end = m.get(0).unwrap().end();
+  });
+  new_str += &result[pre_end..];
+  result = new_str;
+
+  let mut new_str: String = String::new();
+  let mut pre_end = 0;
+  BIN_REGEX2.captures_iter(&result).for_each(|m| {
+    new_str += &result[pre_end..m.get(0).unwrap().start()];
+    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 2).unwrap();
+    new_str = format!("{}{}", new_str, int);
+    pre_end = m.get(0).unwrap().end();
+  });
+  new_str += &result[pre_end..];
+  result = new_str;
+
+  let mut new_str: String = String::new();
+  let mut pre_end = 0;
+  OCT_REGEX.captures_iter(&result).for_each(|m| {
+    new_str += &result[pre_end..m.get(0).unwrap().start()];
+    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 8).unwrap();
     new_str = format!("{}{}", new_str, int);
     pre_end = m.get(0).unwrap().end();
   });
