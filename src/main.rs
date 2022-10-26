@@ -10,6 +10,7 @@ lazy_static! {
   static ref GB_REGEX: Regex = Regex::new(r"(?i)(\d+)GB").unwrap();
   static ref TB_REGEX: Regex = Regex::new(r"(?i)(\d+)TB").unwrap();
   static ref PB_REGEX: Regex = Regex::new(r"(?i)(\d+)PB").unwrap();
+  static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=\s*(\d+)").unwrap();
 }
 
 fn build_arg() -> clap::ArgMatches {
@@ -71,7 +72,7 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   return result;
 }
 
-fn interactive(base: u32) {
+fn interactive(mut base: u32) {
   let stdin = std::io::stdin();
   let mut context = HashMapContext::new();
   loop {
@@ -87,6 +88,18 @@ fn interactive(base: u32) {
         }
       }
     };
+    if let Some(cap) = BASE_REGEX.captures(&input) {
+      let new_base = match cap.get(1).unwrap().as_str().parse::<u32>() {
+        Ok(i) => i,
+        Err(e) => {
+          println!("Convert to int failed: {}", e);
+          continue;
+        }
+      };
+      base = new_base;
+      println!("new base = {}", base);
+      continue;
+    }
     input = replace_vars(&input);
     match eval_with_context_mut(&input, &mut context) {
       Ok(result) => print_val(result, base),
