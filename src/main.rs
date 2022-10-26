@@ -29,13 +29,39 @@ fn build_arg() -> clap::ArgMatches {
     .about(HELP_MSG)
     .arg(
       clap::Arg::new("output_base")
-        .short('b')
+        .short('B')
         .long("base")
         .action(clap::ArgAction::Set)
         .default_value("10")
         .help("Only affect integer results"),
     )
+    .arg(
+      clap::Arg::new("hex")
+        .short('x')
+        .long("hex")
+        .action(clap::ArgAction::SetTrue)
+        .help("Short hand of --base 16"),
+    )
+    .arg(
+      clap::Arg::new("bin")
+        .short('b')
+        .long("bin")
+        .action(clap::ArgAction::SetTrue)
+        .help("Short hand of --base 2"),
+    )
+    .arg(
+      clap::Arg::new("oct")
+        .short('o')
+        .long("oct")
+        .action(clap::ArgAction::SetTrue)
+        .help("Short hand of --base 8"),
+    )
     .arg(clap::Arg::new("formula").action(clap::ArgAction::Append))
+    .group(
+      clap::ArgGroup::new("base")
+        .args(["output_base", "hex", "bin", "oct"])
+        .multiple(false),
+    )
     .get_matches()
 }
 
@@ -43,11 +69,19 @@ fn main() {
   let args = build_arg();
   let mut context = HashMapContext::new();
   custom_fn::add_custom_function(&mut context);
-  let base: u32 = args
-    .get_one::<String>("output_base")
-    .expect("Get output base failed")
-    .parse::<u32>()
-    .expect("Invalid base");
+  let base: u32 = if args.get_flag("hex") {
+    16
+  } else if args.get_flag("oct") {
+    8
+  } else if args.get_flag("bin") {
+    2
+  } else {
+    args
+      .get_one::<String>("output_base")
+      .expect("Get output base failed")
+      .parse::<u32>()
+      .expect("Invalid base")
+  };
   println!("base: {}", base);
   if !args.contains_id("formula") {
     interactive(base, &mut context);
