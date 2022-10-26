@@ -162,10 +162,12 @@ fn convert_to_string(int: i64, base: u32) -> Result<String, String> {
   }
   let mut result = String::new();
   let mut exp = 0;
+  let int = int as i128;
+  let base = base as u128;
   if int < 0 {
     result.insert(0, '-');
   }
-  let mut abs = int.abs() as u32;
+  let mut abs = int.abs() as u128;
   loop {
     exp += 1;
     let tmp = base.pow(exp);
@@ -182,7 +184,7 @@ fn convert_to_string(int: i64, base: u32) -> Result<String, String> {
     } else {
       result.insert(result.len(), ('0' as u8 + (digit)) as char);
     }
-    abs -= digit as u32 * tmp_base;
+    abs -= digit as u128 * tmp_base;
     if exp == 0 {
       break;
     } else {
