@@ -2,6 +2,7 @@ use evalexpr::*;
 use regex::Regex;
 #[macro_use]
 extern crate lazy_static;
+mod custom_fn;
 
 lazy_static! {
   static ref BIT_REGEX: Regex = Regex::new(r"(?i)BIT(\d+)").unwrap();
@@ -11,8 +12,8 @@ lazy_static! {
   static ref TB_REGEX: Regex = Regex::new(r"(?i)(\d+)TB").unwrap();
   static ref PB_REGEX: Regex = Regex::new(r"(?i)(\d+)PB").unwrap();
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=\s*(\d+)").unwrap();
-  static ref HEX_REGEX1: Regex = Regex::new(r"(?i)0x([a-z0-9]+)").unwrap();
-  static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-z0-9]+)(?-i)h").unwrap();
+  static ref HEX_REGEX1: Regex = Regex::new(r"(?i)0x([a-f0-9]+)").unwrap();
+  static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-f0-9]+)(?-i)h").unwrap();
 }
 
 fn build_arg() -> clap::ArgMatches {
@@ -34,6 +35,8 @@ fn build_arg() -> clap::ArgMatches {
 
 fn main() {
   let args = build_arg();
+  let mut context = HashMapContext::new();
+  custom_fn::add_custom_function(&mut context);
   let base: u32 = args
     .get_one::<String>("output_base")
     .expect("Get output base failed")
@@ -41,7 +44,7 @@ fn main() {
     .expect("Invalid base");
   println!("base: {}", base);
   if !args.contains_id("formula") {
-    interactive(base);
+    interactive(base, &mut context);
   } else {
     let items: Vec<String> = args
       .get_many::<String>("formula")
@@ -49,7 +52,8 @@ fn main() {
       .map(|s| s.into())
       .collect();
     let formula = replace_vars(&items.join(" "));
-    let result = eval(&formula).unwrap();
+    let result = eval_with_context_mut(&formula, &mut context)
+      .unwrap_or_else(|e| Value::String(format!("Error: {}", e)));
     print_val(result, base);
   }
 }
@@ -95,9 +99,8 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   return result;
 }
 
-fn interactive(mut base: u32) {
+fn interactive(mut base: u32, context: &mut HashMapContext) {
   let stdin = std::io::stdin();
-  let mut context = HashMapContext::new();
   loop {
     let mut input = String::new();
     match stdin.read_line(&mut input) {
@@ -127,9 +130,9 @@ fn interactive(mut base: u32) {
       continue;
     }
     input = replace_vars(&input);
-    match eval_with_context_mut(&input, &mut context) {
+    match eval_with_context_mut(&input, context) {
       Ok(result) => print_val(result, base),
-      Err(e) => println!("{}", e),
+      Err(e) => println!("Error: {}", e),
     }
   }
 }
