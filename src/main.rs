@@ -46,11 +46,8 @@ fn main() {
       .map(|s| s.into())
       .collect();
     let formula = replace_vars(&items.join(" "));
-    let result = eval_int(&formula).unwrap();
-    println!(
-      "{}",
-      convert_to_string(result, base).expect("Convert to string failed")
-    );
+    let result = eval(&formula).unwrap();
+    print_val(result, base);
   }
 }
 
@@ -92,21 +89,25 @@ fn interactive(base: u32) {
     };
     input = replace_vars(&input);
     match eval_with_context_mut(&input, &mut context) {
-      Ok(result) => match result {
-        Value::String(s) => println!("{}", s),
-        Value::Int(result) => {
-          println!(
-            "{}",
-            convert_to_string(result, base).expect("Convert int to string failed")
-          )
-        }
-        Value::Boolean(b) => println!("{}", b),
-        Value::Float(f) => println!("float: {}", f),
-        Value::Empty => println!("()"),
-        Value::Tuple(t) => println!("{:?}", t),
-      },
+      Ok(result) => print_val(result, base),
       Err(e) => println!("{}", e),
     }
+  }
+}
+
+fn print_val(val: Value, base: u32) {
+  match val {
+    Value::String(s) => println!("{}", s),
+    Value::Int(result) => {
+      println!(
+        "{}",
+        convert_to_string(result, base).expect("Convert int to string failed")
+      )
+    }
+    Value::Boolean(b) => println!("{}", b),
+    Value::Float(f) => println!("float: {}", f),
+    Value::Empty => println!("()"),
+    Value::Tuple(t) => println!("{:?}", t),
   }
 }
 
