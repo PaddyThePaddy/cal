@@ -37,6 +37,18 @@ pub fn add_custom_function(context: &mut HashMapContext) {
   context
     .set_function("not32".into(), Function::new(not32))
     .unwrap();
+  context
+    .set_function("or64".into(), Function::new(or64))
+    .unwrap();
+  context
+    .set_function("and64".into(), Function::new(and64))
+    .unwrap();
+  context
+    .set_function("xor64".into(), Function::new(xor64))
+    .unwrap();
+  context
+    .set_function("not64".into(), Function::new(not64))
+    .unwrap();
 }
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
@@ -73,6 +85,19 @@ fn to_u32(val: &Value) -> EvalexprResult<u32> {
       ));
     }
     return Ok(*int as u32);
+  } else {
+    return Err(EvalexprError::CustomMessage("Value is not int".into()));
+  }
+}
+
+fn to_u64(val: &Value) -> EvalexprResult<u64> {
+  if let Value::Int(int) = val {
+    if *int < 0 || *int > u32::MAX as IntType {
+      return Err(EvalexprError::CustomMessage(
+        "Value exceed 32 bit width".into(),
+      ));
+    }
+    return Ok(*int as u64);
   } else {
     return Err(EvalexprError::CustomMessage("Value is not int".into()));
   }
@@ -252,6 +277,67 @@ fn xor32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
+    return Ok(Value::Int((a ^ b) as IntType));
+  } else {
+    return Err(EvalexprError::WrongFunctionArgumentAmount {
+      expected: 2,
+      actual: 1,
+    });
+  }
+}
+
+fn not64(val: &Value) -> EvalexprResult<Value> {
+  return Ok(Value::Int(!(to_u64(val)?) as IntType));
+}
+
+fn or64(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Tuple(args) = val {
+    if args.len() != 2 {
+      return Err(EvalexprError::WrongFunctionArgumentAmount {
+        expected: 2,
+        actual: args.len(),
+      });
+    }
+    let a = to_u64(&args[0])?;
+    let b = to_u64(&args[1])?;
+    return Ok(Value::Int((a | b) as IntType));
+  } else {
+    return Err(EvalexprError::WrongFunctionArgumentAmount {
+      expected: 2,
+      actual: 1,
+    });
+  }
+}
+
+fn and64(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Tuple(args) = val {
+    if args.len() != 2 {
+      return Err(EvalexprError::WrongFunctionArgumentAmount {
+        expected: 2,
+        actual: args.len(),
+      });
+    }
+    let a = to_u64(&args[0])?;
+    let b = to_u64(&args[1])?;
+    return Ok(Value::Int((a & b) as IntType));
+  } else {
+    return Err(EvalexprError::WrongFunctionArgumentAmount {
+      expected: 2,
+      actual: 1,
+    });
+  }
+}
+
+fn xor64(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Tuple(args) = val {
+    if args.len() != 2 {
+      return Err(EvalexprError::WrongFunctionArgumentAmount {
+        expected: 2,
+        actual: args.len(),
+      });
+    }
+    let a = to_u64(&args[0])?;
+    let b = to_u64(&args[1])?;
     return Ok(Value::Int((a ^ b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
