@@ -11,6 +11,8 @@ lazy_static! {
   static ref TB_REGEX: Regex = Regex::new(r"(?i)(\d+)TB").unwrap();
   static ref PB_REGEX: Regex = Regex::new(r"(?i)(\d+)PB").unwrap();
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=\s*(\d+)").unwrap();
+  static ref HEX_REGEX1: Regex = Regex::new(r"(?i)0x([a-z0-9]+)").unwrap();
+  static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-z0-9]+)(?-i)h").unwrap();
 }
 
 fn build_arg() -> clap::ArgMatches {
@@ -66,6 +68,27 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   result = PB_REGEX
     .replace(&result, "($1 * 1024 * 1024 * 1024 * 1024 * 1024)")
     .into();
+  let mut new_str: String = String::new();
+  let mut pre_end = 0;
+  HEX_REGEX1.captures_iter(&result).for_each(|m| {
+    new_str += &result[pre_end..m.get(0).unwrap().start()];
+    let int = u32::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
+    new_str = format!("{}{}", new_str, int);
+    pre_end = m.get(0).unwrap().end();
+  });
+  new_str += &result[pre_end..];
+  result = new_str;
+
+  let mut new_str: String = String::new();
+  let mut pre_end = 0;
+  HEX_REGEX2.captures_iter(&result).for_each(|m| {
+    new_str += &result[pre_end..m.get(0).unwrap().start()];
+    let int = u32::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
+    new_str = format!("{}{}", new_str, int);
+    pre_end = m.get(0).unwrap().end();
+  });
+  new_str += &result[pre_end..];
+  result = new_str;
   // vars.iter().for_each(|(key, val)| {
   //     result = result.replace(key, val);
   // });
