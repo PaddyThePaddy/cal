@@ -60,7 +60,10 @@ fn to_u8(val: &Value) -> EvalexprResult<u8> {
     }
     return Ok(*int as u8);
   } else {
-    return Err(EvalexprError::CustomMessage("Value is not int".into()));
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
   }
 }
 
@@ -73,7 +76,10 @@ fn to_u16(val: &Value) -> EvalexprResult<u16> {
     }
     return Ok(*int as u16);
   } else {
-    return Err(EvalexprError::CustomMessage("Value is not int".into()));
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
   }
 }
 
@@ -86,7 +92,10 @@ fn to_u32(val: &Value) -> EvalexprResult<u32> {
     }
     return Ok(*int as u32);
   } else {
-    return Err(EvalexprError::CustomMessage("Value is not int".into()));
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
   }
 }
 
@@ -99,7 +108,10 @@ fn to_u64(val: &Value) -> EvalexprResult<u64> {
     }
     return Ok(*int as u64);
   } else {
-    return Err(EvalexprError::CustomMessage("Value is not int".into()));
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
   }
 }
 

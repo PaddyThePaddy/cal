@@ -53,7 +53,7 @@ fn main() {
       .collect();
     let formula = replace_vars(&items.join(" "));
     let result = eval_with_context_mut(&formula, &mut context)
-      .unwrap_or_else(|e| Value::String(format!("Error: {}", e)));
+      .unwrap_or_else(|e| Value::String(format!("{}", e)));
     print_val(result, base);
   }
 }
@@ -132,7 +132,7 @@ fn interactive(mut base: u32, context: &mut HashMapContext) {
     input = replace_vars(&input);
     match eval_with_context_mut(&input, context) {
       Ok(result) => print_val(result, base),
-      Err(e) => println!("Error: {}", e),
+      Err(e) => println!("{}", e),
     }
   }
 }
