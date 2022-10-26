@@ -16,11 +16,17 @@ lazy_static! {
   static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-f0-9]+)(?-i)h").unwrap();
 }
 
+const HELP_MSG: &str = r#"A cli calculator highly depends on crate https://github.com/ISibboI/evalexpr.
+Check readme on the github page for the expression syntax.
+
+Note: Add a . after integers to convert them to float (like "5."), that will force the evalexpr module use normal calculation rules.
+Or it will use programming calculation rules by default (like 3 / 2 == 1)"#;
+
 fn build_arg() -> clap::ArgMatches {
   clap::Command::new("cal")
     .author("paddythepaddy@duck.com")
     .version(git_version::git_version!())
-    .about("Cli calculator for myself\nAdd a . after integers to convert them to float (like \"5.\"), that will force the evalexpr module use normal calculation rules. Or it will use programming calculation rules by default")
+    .about(HELP_MSG)
     .arg(
       clap::Arg::new("output_base")
         .short('b')
