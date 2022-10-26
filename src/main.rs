@@ -11,7 +11,7 @@ lazy_static! {
   static ref GB_REGEX: Regex = Regex::new(r"(?i)(\d+)GB").unwrap();
   static ref TB_REGEX: Regex = Regex::new(r"(?i)(\d+)TB").unwrap();
   static ref PB_REGEX: Regex = Regex::new(r"(?i)(\d+)PB").unwrap();
-  static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=\s*(\d+)").unwrap();
+  static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
   static ref HEX_REGEX1: Regex = Regex::new(r"(?i)0x([a-f0-9]+)").unwrap();
   static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-f0-9]+)(?-i)h").unwrap();
 }
