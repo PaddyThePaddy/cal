@@ -17,7 +17,7 @@ lazy_static! {
 }
 
 const HELP_MSG: &str = r#"A cli calculator highly depends on crate https://github.com/ISibboI/evalexpr.
-Check readme on the github page for the expression syntax.
+Check readme on its github page for the expression syntax.
 
 Note: Add a . after integers to convert them to float (like "5."), that will force the evalexpr module use normal calculation rules.
 Or it will use programming calculation rules by default (like 3 / 2 == 1)"#;
