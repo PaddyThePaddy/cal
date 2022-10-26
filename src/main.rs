@@ -36,7 +36,7 @@ fn build_arg() -> clap::ArgMatches {
         .long("base")
         .action(clap::ArgAction::Set)
         .default_value("10")
-        .help("Only affect integer results"),
+        .help("Change outputs radix. Only affects integer results"),
     )
     .arg(
       clap::Arg::new("hex")
