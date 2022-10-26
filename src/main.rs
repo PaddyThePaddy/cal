@@ -19,7 +19,7 @@ fn build_arg() -> clap::ArgMatches {
   clap::Command::new("cal")
     .author("paddythepaddy@duck.com")
     .version(git_version::git_version!())
-    .about("Cli calculator for myself")
+    .about("Cli calculator for myself\nAdd a . after integers to convert them to float (like \"5.\"), that will force the evalexpr module use normal calculation rules. Or it will use programming calculation rules by default")
     .arg(
       clap::Arg::new("output_base")
         .short('b')
