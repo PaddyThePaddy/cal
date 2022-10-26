@@ -176,8 +176,12 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
 }
 
 fn interactive(mut base: u32, context: &mut HashMapContext) {
+  use std::io::Write;
   let stdin = std::io::stdin();
+  let mut stdout = std::io::stdout();
   loop {
+    write!(stdout, "input> ").unwrap();
+    stdout.flush().unwrap();
     let mut input = String::new();
     match stdin.read_line(&mut input) {
       Err(e) => {
