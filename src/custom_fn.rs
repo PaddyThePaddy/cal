@@ -41,7 +41,7 @@ pub fn add_custom_function(context: &mut HashMapContext) {
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u8::MAX as i64 {
+    if *int < 0 || *int > u8::MAX as IntType {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 8 bit width".into(),
       ));
@@ -54,7 +54,7 @@ fn to_u8(val: &Value) -> EvalexprResult<u8> {
 
 fn to_u16(val: &Value) -> EvalexprResult<u16> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u16::MAX as i64 {
+    if *int < 0 || *int > u16::MAX as IntType {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 16 bit width".into(),
       ));
@@ -67,7 +67,7 @@ fn to_u16(val: &Value) -> EvalexprResult<u16> {
 
 fn to_u32(val: &Value) -> EvalexprResult<u32> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u32::MAX as i64 {
+    if *int < 0 || *int > u32::MAX as IntType {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 32 bit width".into(),
       ));
@@ -79,7 +79,7 @@ fn to_u32(val: &Value) -> EvalexprResult<u32> {
 }
 
 fn not8(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u8(val)?) as i64));
+  return Ok(Value::Int(!(to_u8(val)?) as IntType));
 }
 
 fn or8(val: &Value) -> EvalexprResult<Value> {
@@ -92,7 +92,7 @@ fn or8(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u8(&args[0])?;
     let b = to_u8(&args[1])?;
-    return Ok(Value::Int((a | b) as i64));
+    return Ok(Value::Int((a | b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -111,7 +111,7 @@ fn and8(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u8(&args[0])?;
     let b = to_u8(&args[1])?;
-    return Ok(Value::Int((a & b) as i64));
+    return Ok(Value::Int((a & b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -130,7 +130,7 @@ fn xor8(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u8(&args[0])?;
     let b = to_u8(&args[1])?;
-    return Ok(Value::Int((a ^ b) as i64));
+    return Ok(Value::Int((a ^ b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -140,7 +140,7 @@ fn xor8(val: &Value) -> EvalexprResult<Value> {
 }
 
 fn not16(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u16(val)?) as i64));
+  return Ok(Value::Int(!(to_u16(val)?) as IntType));
 }
 
 fn or16(val: &Value) -> EvalexprResult<Value> {
@@ -153,7 +153,7 @@ fn or16(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u16(&args[0])?;
     let b = to_u16(&args[1])?;
-    return Ok(Value::Int((a | b) as i64));
+    return Ok(Value::Int((a | b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -172,7 +172,7 @@ fn and16(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u16(&args[0])?;
     let b = to_u16(&args[1])?;
-    return Ok(Value::Int((a & b) as i64));
+    return Ok(Value::Int((a & b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -191,7 +191,7 @@ fn xor16(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u16(&args[0])?;
     let b = to_u16(&args[1])?;
-    return Ok(Value::Int((a ^ b) as i64));
+    return Ok(Value::Int((a ^ b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -201,7 +201,7 @@ fn xor16(val: &Value) -> EvalexprResult<Value> {
 }
 
 fn not32(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u32(val)?) as i64));
+  return Ok(Value::Int(!(to_u32(val)?) as IntType));
 }
 
 fn or32(val: &Value) -> EvalexprResult<Value> {
@@ -214,7 +214,7 @@ fn or32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
-    return Ok(Value::Int((a | b) as i64));
+    return Ok(Value::Int((a | b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -233,7 +233,7 @@ fn and32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
-    return Ok(Value::Int((a & b) as i64));
+    return Ok(Value::Int((a & b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -252,7 +252,7 @@ fn xor32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
-    return Ok(Value::Int((a ^ b) as i64));
+    return Ok(Value::Int((a ^ b) as IntType));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,

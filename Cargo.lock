@@ -64,8 +64,7 @@ dependencies = [
 [[package]]
 name = "evalexpr"
 version = "8.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aacfb566035f8cd02f6ec9247c242f3f9904a0b288ea383abcf4e95df6436a34"
+source = "git+https://github.com/PaddyThePaddy/evalexpr?branch=main#802d9a015db543a53f640ce5c76d24bd0ba08c0e"
 
 [[package]]
 name = "git-version"

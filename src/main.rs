@@ -153,7 +153,7 @@ fn print_val(val: Value, base: u32) {
   }
 }
 
-fn convert_to_string(int: i64, base: u32) -> Result<String, String> {
+fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
   if base > 36 || base < 2 {
     return Err("Invalid base".into());
   }
