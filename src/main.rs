@@ -111,6 +111,9 @@ fn interactive(mut base: u32) {
         }
       }
     };
+    if input.trim() == "exit" {
+      break;
+    }
     if let Some(cap) = BASE_REGEX.captures(&input) {
       let new_base = match cap.get(1).unwrap().as_str().parse::<u32>() {
         Ok(i) => i,
