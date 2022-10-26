@@ -49,6 +49,12 @@ pub fn add_custom_function(context: &mut HashMapContext) {
   context
     .set_function("not64".into(), Function::new(not64))
     .unwrap();
+  context
+    .set_function("bits".into(), Function::new(bits))
+    .unwrap();
+  context
+    .set_function("bits_t".into(), Function::new(bits_t))
+    .unwrap();
 }
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
@@ -356,5 +362,43 @@ fn xor64(val: &Value) -> EvalexprResult<Value> {
       expected: 2,
       actual: 1,
     });
+  }
+}
+
+fn bits(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Int(int) = val {
+    let int = *int as u128;
+    let mut result: Vec<String> = Vec::new();
+    for i in 0..128 {
+      if int & 1 << i != 0 {
+        result.push(i.to_string());
+      }
+    }
+
+    return Ok(Value::String(result.join(", ")));
+  } else {
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
+  }
+}
+
+fn bits_t(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Int(int) = val {
+    let int = *int as u128;
+    let mut result = Vec::new();
+    for i in 0..128 {
+      if int & 1 << i != 0 {
+        result.push(Value::Int(i.into()));
+      }
+    }
+
+    return Ok(Value::Tuple(result));
+  } else {
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
   }
 }
