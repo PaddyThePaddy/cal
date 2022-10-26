@@ -47,7 +47,7 @@ fn main() {
       .collect();
     let formula = replace_vars(&items.join(" "));
     let result = eval_int(&formula).unwrap();
-    print!(
+    println!(
       "{}",
       convert_to_string(result, base).expect("Convert to string failed")
     );
