@@ -107,9 +107,9 @@ fn to_u32(val: &Value) -> EvalexprResult<u32> {
 
 fn to_u64(val: &Value) -> EvalexprResult<u64> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u32::MAX as IntType {
+    if *int < 0 || *int > u64::MAX as IntType {
       return Err(EvalexprError::CustomMessage(
-        "Value exceed 32 bit width".into(),
+        "Value exceed 36 bit width".into(),
       ));
     }
     return Ok(*int as u64);
