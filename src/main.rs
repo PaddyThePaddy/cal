@@ -85,7 +85,9 @@ fn main() {
       .parse::<u32>()
       .expect("Invalid base")
   };
-  println!("base: {}", base);
+  if atty::is(atty::Stream::Stdin) {
+    println!("base: {}", base);
+  }
   if !args.contains_id("formula") {
     interactive(base, &mut context);
   } else {
@@ -180,8 +182,10 @@ fn interactive(mut base: u32, context: &mut HashMapContext) {
   let stdin = std::io::stdin();
   let mut stdout = std::io::stdout();
   loop {
-    write!(stdout, "input> ").unwrap();
-    stdout.flush().unwrap();
+    if atty::is(atty::Stream::Stdin) {
+      write!(stdout, "input> ").unwrap();
+      stdout.flush().unwrap();
+    }
     let mut input = String::new();
     match stdin.read_line(&mut input) {
       Err(e) => {
