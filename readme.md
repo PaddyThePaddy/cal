@@ -39,8 +39,8 @@ Application behaviors that are not provided by `evalexpr` crate.
    2. `#KB` => `(# * 1024)`
    3. `#MB` => `(# * 1024 * 1024)`
    3. `#GB` => `(# * 1024 * 1024 * 1024)`
-   3. `#TB` => `(# * 1024 * 1024 * 1024)`
-   3. `#PB` => `(# * 1024 * 1024 * 1024)`
+   3. `#TB` => `(# * 1024 * 1024 * 1024 * 1024)`
+   3. `#PB` => `(# * 1024 * 1024 * 1024 * 1024 * 1024)`
 3. Binary, octal, hexadecimal literal
    1. `0b###` or `###b` for binary
    2. `0###` for octal
