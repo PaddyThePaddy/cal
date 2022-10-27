@@ -55,6 +55,9 @@ pub fn add_custom_function(context: &mut HashMapContext) {
   context
     .set_function("bits_t".into(), Function::new(bits_t))
     .unwrap();
+  context
+    .set_function("float".into(), Function::new(float))
+    .unwrap();
 }
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
@@ -65,6 +68,18 @@ fn to_u8(val: &Value) -> EvalexprResult<u8> {
       ));
     }
     return Ok(*int as u8);
+  } else {
+    return Err(EvalexprError::CustomMessage(format!(
+      "Value {:?} is not int",
+      val
+    )));
+  }
+}
+
+fn float(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Int(int) = val {
+    let f = *int as f64;
+    return Ok(Value::Float(f));
   } else {
     return Err(EvalexprError::CustomMessage(format!(
       "Value {:?} is not int",
