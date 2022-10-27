@@ -34,17 +34,18 @@ input> 1 + 2
 Application behaviors that are not provided by `evalexpr` crate.
 
 1. Change output base with command line flags, or by `base = #` or `base(#)` command in the interactive mode.
-2. Pre-processed alias:
-   1. `BIT#` => `shl(1, #)`
-   2. `#KB` => `(# * 1024)`
-   3. `#MB` => `(# * 1024 * 1024)`
-   3. `#GB` => `(# * 1024 * 1024 * 1024)`
-   3. `#TB` => `(# * 1024 * 1024 * 1024 * 1024)`
-   3. `#PB` => `(# * 1024 * 1024 * 1024 * 1024 * 1024)`
+2. Pre-processed alias: (case insensitive)
+    1. `BIT#` -> `shl(1, #)`
+    2. `#KB` -> `(# * 1024)`
+    3. `#MB` -> `(# * 1024 * 1024)`
+    3. `#GB` -> `(# * 1024 * 1024 * 1024)`
+    3. `#TB` -> `(# * 1024 * 1024 * 1024 * 1024)`
+    3. `#PB` -> `(# * 1024 * 1024 * 1024 * 1024 * 1024)`
 3. Binary, octal, hexadecimal literal
-   1. `0b###` or `###b` for binary
-   2. `0###` for octal
-   3. `0x###` or `###h` for hexadecimal
+    1. `0b###` or `###b` for binary
+    2. `0###` for octal
+    3. `0x###` or `###h` for hexadecimal
 4. Fixed width bit operation functions
   Includes `not#(a)`, `or#(a, b)`, `and#(a, b)`, `xor(a, b)`. `#` can be 8, 16, 32, 64
 5. `float` function to force floating number type.
+6. `bits` and `bits_t` to count set bits in the input. `bits` prints the result as string while `bits_t` will output `evalexpr` crates `Tuple` type.
