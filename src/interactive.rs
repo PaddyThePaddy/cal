@@ -1,6 +1,10 @@
 use super::*;
 use rustyline::Editor;
 
+lazy_static! {
+  static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
+}
+
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut rl = Editor::<()>::new().unwrap();
 
@@ -25,7 +29,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
       println!("new base = {}", base);
       continue;
     }
-    input = replace_vars(&input);
+    input = pre_processor::pre_process(&input);
     match eval_with_context_mut(&input, context) {
       Ok(result) => print_val(result, base),
       Err(e) => println!("{}", e),
