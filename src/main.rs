@@ -85,10 +85,10 @@ fn main() {
       .parse::<u32>()
       .expect("Invalid base")
   };
-  if atty::is(atty::Stream::Stdin) {
-    println!("base: {}", base);
-  }
   if !args.contains_id("formula") {
+    if atty::is(atty::Stream::Stdin) {
+      println!("base: {}", base);
+    }
     interactive(base, &mut context);
   } else {
     let items: Vec<String> = args
