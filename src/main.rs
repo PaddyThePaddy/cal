@@ -3,6 +3,7 @@ use regex::Regex;
 #[macro_use]
 extern crate lazy_static;
 mod custom_fn;
+mod interactive;
 
 lazy_static! {
   static ref BIT_REGEX: Regex = Regex::new(r"(?i)BIT(\d+)").unwrap();
@@ -89,7 +90,7 @@ fn main() {
     if atty::is(atty::Stream::Stdin) {
       println!("base: {}", base);
     }
-    interactive(base, &mut context);
+    interactive::interactive(base, &mut context);
   } else {
     let items: Vec<String> = args
       .get_many::<String>("formula")
@@ -175,50 +176,6 @@ fn replace_vars(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   //     result = result.replace(key, val);
   // });
   return result;
-}
-
-fn interactive(mut base: u32, context: &mut HashMapContext) {
-  use std::io::Write;
-  let stdin = std::io::stdin();
-  let mut stdout = std::io::stdout();
-  loop {
-    if atty::is(atty::Stream::Stdin) {
-      write!(stdout, "input> ").unwrap();
-      stdout.flush().unwrap();
-    }
-    let mut input = String::new();
-    match stdin.read_line(&mut input) {
-      Err(e) => {
-        eprintln!("{:?}", e);
-        break;
-      }
-      Ok(n) => {
-        if n == 0 {
-          break;
-        }
-      }
-    };
-    if input.trim() == "exit" {
-      break;
-    }
-    if let Some(cap) = BASE_REGEX.captures(&input) {
-      let new_base = match cap.get(1).unwrap().as_str().parse::<u32>() {
-        Ok(i) => i,
-        Err(e) => {
-          println!("Convert to int failed: {}", e);
-          continue;
-        }
-      };
-      base = new_base;
-      println!("new base = {}", base);
-      continue;
-    }
-    input = replace_vars(&input);
-    match eval_with_context_mut(&input, context) {
-      Ok(result) => print_val(result, base),
-      Err(e) => println!("{}", e),
-    }
-  }
 }
 
 fn print_val(val: Value, base: u32) {
