@@ -1,0 +1,50 @@
+# Command line calculator
+A wrapper application of https://github.com/ISibboI/evalexpr with some minor tweaks.
+
+# Execution mode:
+1. Parameter: 
+```
+> cal 1 + 2
+3
+```
+2. Pipeline
+```
+> echo '1 + 2' | cal
+3
+```
+3. Interactive
+```
+> cal
+base: 10
+input> 1 + 2
+3
+```
+
+# Flags
+```
+  -B, --base <output_base>  Change outputs radix. Only affects integer results [default: 10]
+  -x, --hex                 Short hand of --base 16
+  -b, --bin                 Short hand of --base 2
+  -o, --oct                 Short hand of --base 8
+  -h, --help                Print help information
+  -V, --version             Print version information
+```
+
+# Additional features
+Application behaviors that are not provided by `evalexpr` crate.
+
+1. Change output base with command line flags, or by `base = #` or `base(#)` command in the interactive mode.
+2. Pre-processed alias:
+   1. `BIT#` => `shl(1, #)`
+   2. `#KB` => `(# * 1024)`
+   3. `#MB` => `(# * 1024 * 1024)`
+   3. `#GB` => `(# * 1024 * 1024 * 1024)`
+   3. `#TB` => `(# * 1024 * 1024 * 1024)`
+   3. `#PB` => `(# * 1024 * 1024 * 1024)`
+3. Binary, octal, hexadecimal literal
+   1. `0b###` or `###b` for binary
+   2. `0###` for octal
+   3. `0x###` or `###h` for hexadecimal
+4. Fixed width bit operation functions
+  Includes `not#(a)`, `or#(a, b)`, `and#(a, b)`, `xor(a, b)`. `#` can be 8, 16, 32, 64
+5. `float` function to force floating number type.
