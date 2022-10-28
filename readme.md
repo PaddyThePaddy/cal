@@ -48,6 +48,6 @@ Application behaviors that are not provided by `evalexpr` crate.
 4. Fixed width bit operation functions
   Includes `not#(a)`, `or#(a, b)`, `and#(a, b)`, `xor(a, b)`. `#` can be 8, 16, 32, 64
 5. `float` function to force floating number type.
-6. `bits` and `bits_t` function to count set bits in the input. `bits` prints the result as string while `bits_t` will output `evalexpr` crates `Tuple` type.
-7. Make `or`, `and`, `xor`, `not` aliases for `bitor`, `bitand`, `bitxor`, `bitnot`
+6. `bits` and `bits_t` function to count set bits in the input. `bits` prints the result as a string while `bits_t` will output `evalexpr` crates `Tuple` type.
+7. Make `or`, `and`, `xor`, `not` aliases for `bitor`, `bitand`, `bitxor`, `bitnot`.
 8. A memory storage in the interactive mode that can retrieve the previous result by `$#` where `$1` is the most recent result, and `$2` is the second one... etc.
