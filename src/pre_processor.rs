@@ -11,7 +11,7 @@ lazy_static! {
   static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-f0-9]+)(?-i)h").unwrap();
   static ref BIN_REGEX1: Regex = Regex::new(r"(?i)0b([01]+)").unwrap();
   static ref BIN_REGEX2: Regex = Regex::new(r"(?i)([01]+)(?-i)b").unwrap();
-  static ref OCT_REGEX: Regex = Regex::new(r"(?i)\b0([0-7]+)\b").unwrap();
+  static ref OCT_REGEX: Regex = Regex::new(r"(?i)(?:^|[^\w\d.])0([0-7]+)(?:\b|\D)").unwrap();
   static ref BIT_FN_REGEX: Regex = Regex::new(r"(?i)\b(or|xor|and|not)\b").unwrap();
 }
 
