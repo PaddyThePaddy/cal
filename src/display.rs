@@ -1,12 +1,12 @@
 use super::*;
 
-pub fn print_val(val: Value, base: u32) {
+pub fn print_val(val: &Value, base: u32) {
   match val {
     Value::String(s) => println!("{}", s),
     Value::Int(result) => {
       println!(
         "{}",
-        convert_to_string(result, base).expect("Convert int to string failed")
+        convert_to_string(*result, base).expect("Convert int to string failed")
       )
     }
     Value::Boolean(b) => println!("{}", b),

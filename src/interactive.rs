@@ -3,12 +3,13 @@ use rustyline::{Config, Editor};
 
 lazy_static! {
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
+  static ref MEM_REGEX: Regex = Regex::new(r"\$(\d+)").unwrap();
 }
 
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut rl = Editor::<()>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
-
-  loop {
+  let mut memory: Vec<Value> = Vec::new();
+  'control: loop {
     let mut input = match rl.readline("input> ") {
       Ok(s) => s,
       Err(_) => break,
@@ -28,9 +29,46 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
       println!("new base = {}\n", base);
       continue;
     }
+
+    let mut new_str: String = String::new();
+    let mut pre_end = 0;
+    for m in MEM_REGEX.captures_iter(&input) {
+      if memory.len() == 0 {
+        println!("No memory at the moment.\n");
+        continue 'control;
+      }
+      new_str += &input[pre_end..m.get(0).unwrap().start()];
+      let index = match m.get(1).unwrap().as_str().parse::<usize>() {
+        Ok(i) => i,
+        Err(_) => {
+          println!(
+            "Convert {}'s index failed. Valid range is from 1 to {}.\n",
+            m.get(0).unwrap().as_str(),
+            memory.len()
+          );
+          continue 'control;
+        }
+      };
+      if index > memory.len() || index == 0 {
+        println!(
+          "{} exceed valid memory slots. Valid range is from 1 to {}.\n",
+          m.get(0).unwrap().as_str(),
+          memory.len()
+        );
+        continue 'control;
+      }
+      new_str = memory[memory.len() - index].to_string();
+      pre_end = m.get(0).unwrap().end();
+    }
+    new_str += &input[pre_end..];
+    input = new_str;
+
     input = pre_processor::pre_process(&input);
     match eval_with_context_mut(&input, context) {
-      Ok(result) => display::print_val(result, base),
+      Ok(result) => {
+        display::print_val(&result, base);
+        memory.push(result)
+      }
       Err(e) => println!("{}", e),
     }
     println!();
