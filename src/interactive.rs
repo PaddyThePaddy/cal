@@ -26,7 +26,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
         }
       };
       base = new_base;
-      println!("new base = {}", base);
+      println!("new base = {}\n", base);
       continue;
     }
     input = pre_processor::pre_process(&input);
