@@ -1,19 +1,18 @@
 use super::*;
-use rustyline::Editor;
+use rustyline::{Config, Editor};
 
 lazy_static! {
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
 }
 
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
-  let mut rl = Editor::<()>::new().unwrap();
+  let mut rl = Editor::<()>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
 
   loop {
     let mut input = match rl.readline("input> ") {
       Ok(s) => s,
       Err(_) => break,
     };
-    rl.add_history_entry(&input);
     if input.trim() == "exit" {
       break;
     }
