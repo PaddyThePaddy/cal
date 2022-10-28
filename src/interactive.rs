@@ -31,8 +31,9 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     }
     input = pre_processor::pre_process(&input);
     match eval_with_context_mut(&input, context) {
-      Ok(result) => print_val(result, base),
+      Ok(result) => display::print_val(result, base),
       Err(e) => println!("{}", e),
     }
+    println!();
   }
 }
