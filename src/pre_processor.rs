@@ -7,11 +7,12 @@ lazy_static! {
   static ref GB_REGEX: Regex = Regex::new(r"(?i)(\d+)GB").unwrap();
   static ref TB_REGEX: Regex = Regex::new(r"(?i)(\d+)TB").unwrap();
   static ref PB_REGEX: Regex = Regex::new(r"(?i)(\d+)PB").unwrap();
-  static ref HEX_REGEX1: Regex = Regex::new(r"(?i)0x([a-f0-9]+)").unwrap();
-  static ref HEX_REGEX2: Regex = Regex::new(r"(?i)([a-f0-9]+)(?-i)h").unwrap();
-  static ref BIN_REGEX1: Regex = Regex::new(r"(?i)0b([01]+)").unwrap();
-  static ref BIN_REGEX2: Regex = Regex::new(r"(?i)([01]+)(?-i)b").unwrap();
-  static ref OCT_REGEX: Regex = Regex::new(r"(?i)(?:^|[^\w\d.])0([0-7]+)(?:\b|\D)").unwrap();
+  static ref HEX_REGEX1: Regex = Regex::new(r"\b0x(?i)([a-f0-9]+)\b").unwrap();
+  static ref HEX_REGEX2: Regex = Regex::new(r"\b(?i)([a-f0-9]+)(?-i)h\b").unwrap();
+  static ref BIN_REGEX1: Regex = Regex::new(r"\b0b(?i)([01]+)\b").unwrap();
+  static ref BIN_REGEX2: Regex = Regex::new(r"\b(?i)([01]+)(?-i)b\b").unwrap();
+  static ref OCT_REGEX1: Regex = Regex::new(r"\b0o(?i)([0-7]+)\b").unwrap();
+  static ref OCT_REGEX2: Regex = Regex::new(r"\b(?i)([0-7]+)(?-i)o\b").unwrap();
   static ref BIT_FN_REGEX: Regex = Regex::new(r"(?i)\b(or|xor|and|not)\b").unwrap();
 }
 
@@ -63,7 +64,15 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
     })
     .into_owned();
 
-  result = OCT_REGEX
+  result = OCT_REGEX1
+    .replace(&result, |cap: &Captures| {
+      u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
+        .unwrap()
+        .to_string()
+    })
+    .into_owned();
+
+  result = OCT_REGEX2
     .replace(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
         .unwrap()

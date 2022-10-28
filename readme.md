@@ -42,9 +42,9 @@ Application behaviors that are not provided by `evalexpr` crate.
     5. `#TB` -> `(# * 1024 * 1024 * 1024 * 1024)`
     6. `#PB` -> `(# * 1024 * 1024 * 1024 * 1024 * 1024)`
 3. Binary, octal, hexadecimal literal
-    1. `0b###` or `###b` for binary
-    2. `0###` for octal
-    3. `0x###` or `###h` for hexadecimal
+    1. `0b###` or `###b` for binary number
+    2. `0o###` or `###o` for octal number
+    3. `0x###` or `###h` for hexadecimal number
 4. Fixed width bit operation functions
   Includes `not#(a)`, `or#(a, b)`, `and#(a, b)`, `xor(a, b)`. `#` can be 8, 16, 32, 64
 5. `float` function to force floating number type.
