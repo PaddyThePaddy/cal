@@ -10,7 +10,13 @@ pub fn print_val(val: &Value, base: u32) {
       )
     }
     Value::Boolean(b) => println!("{}", b),
-    Value::Float(f) => println!("float: {}", f),
+    Value::Float(f) => {
+      if f.floor() == *f {
+        println!("{:.1}", f);
+      } else {
+        println!("{}", f)
+      }
+    }
     Value::Empty => println!("()"),
     Value::Tuple(t) => println!("{:?}", t),
   }
