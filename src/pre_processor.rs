@@ -12,7 +12,7 @@ lazy_static! {
   static ref BIN_REGEX1: Regex = Regex::new(r"(?i)0b([01]+)").unwrap();
   static ref BIN_REGEX2: Regex = Regex::new(r"(?i)([01]+)(?-i)b").unwrap();
   static ref OCT_REGEX: Regex = Regex::new(r"(?i)\b0([0-7]+)\b").unwrap();
-  static ref BIT_FN_REGEX: Regex = Regex::new(r"(?i)\b(or|xor|and)\b").unwrap();
+  static ref BIT_FN_REGEX: Regex = Regex::new(r"(?i)\b(or|xor|and|not)\b").unwrap();
 }
 
 pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String {
