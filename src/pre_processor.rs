@@ -1,4 +1,4 @@
-use regex::Regex;
+use regex::{Captures, Regex};
 
 lazy_static! {
   static ref BIT_REGEX: Regex = Regex::new(r"(?i)BIT(\d+)").unwrap();
@@ -30,60 +30,46 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
   result = PB_REGEX
     .replace(&result, "($1 * 1024 * 1024 * 1024 * 1024 * 1024)")
     .into();
-  let mut new_str: String = String::new();
-  let mut pre_end = 0;
-  HEX_REGEX1.captures_iter(&result).for_each(|m| {
-    new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
-    new_str = format!("{}{}", new_str, int);
-    pre_end = m.get(0).unwrap().end();
-  });
-  new_str += &result[pre_end..];
-  result = new_str;
 
-  let mut new_str: String = String::new();
-  let mut pre_end = 0;
-  HEX_REGEX2.captures_iter(&result).for_each(|m| {
-    new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 16).unwrap();
-    new_str = format!("{}{}", new_str, int);
-    pre_end = m.get(0).unwrap().end();
-  });
-  new_str += &result[pre_end..];
-  result = new_str;
+  result = HEX_REGEX1
+    .replace(&result, |cap: &Captures| {
+      u128::from_str_radix(cap.get(1).unwrap().as_str(), 16)
+        .unwrap()
+        .to_string()
+    })
+    .into_owned();
 
-  let mut new_str: String = String::new();
-  let mut pre_end = 0;
-  BIN_REGEX1.captures_iter(&result).for_each(|m| {
-    new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 2).unwrap();
-    new_str = format!("{}{}", new_str, int);
-    pre_end = m.get(0).unwrap().end();
-  });
-  new_str += &result[pre_end..];
-  result = new_str;
+  result = HEX_REGEX2
+    .replace(&result, |cap: &Captures| {
+      u128::from_str_radix(cap.get(1).unwrap().as_str(), 16)
+        .unwrap()
+        .to_string()
+    })
+    .into_owned();
 
-  let mut new_str: String = String::new();
-  let mut pre_end = 0;
-  BIN_REGEX2.captures_iter(&result).for_each(|m| {
-    new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 2).unwrap();
-    new_str = format!("{}{}", new_str, int);
-    pre_end = m.get(0).unwrap().end();
-  });
-  new_str += &result[pre_end..];
-  result = new_str;
+  result = BIN_REGEX1
+    .replace(&result, |cap: &Captures| {
+      u128::from_str_radix(cap.get(1).unwrap().as_str(), 2)
+        .unwrap()
+        .to_string()
+    })
+    .into_owned();
 
-  let mut new_str: String = String::new();
-  let mut pre_end = 0;
-  OCT_REGEX.captures_iter(&result).for_each(|m| {
-    new_str += &result[pre_end..m.get(0).unwrap().start()];
-    let int = u128::from_str_radix(m.get(1).unwrap().as_str(), 8).unwrap();
-    new_str = format!("{}{}", new_str, int);
-    pre_end = m.get(0).unwrap().end();
-  });
-  new_str += &result[pre_end..];
-  result = new_str;
+  result = BIN_REGEX2
+    .replace(&result, |cap: &Captures| {
+      u128::from_str_radix(cap.get(1).unwrap().as_str(), 2)
+        .unwrap()
+        .to_string()
+    })
+    .into_owned();
+
+  result = OCT_REGEX
+    .replace(&result, |cap: &Captures| {
+      u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
+        .unwrap()
+        .to_string()
+    })
+    .into_owned();
   // vars.iter().for_each(|(key, val)| {
   //     result = result.replace(key, val);
   // });

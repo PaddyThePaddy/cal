@@ -2,7 +2,6 @@
 extern crate lazy_static;
 
 use evalexpr::*;
-use regex::Regex;
 mod custom_fn;
 mod display;
 mod interactive;

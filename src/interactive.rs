@@ -1,4 +1,5 @@
 use super::*;
+use regex::{Captures, Regex};
 use rustyline::{Config, Editor};
 
 lazy_static! {
@@ -28,6 +29,42 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
       base = new_base;
       println!("new base = {}\n", base);
       continue;
+    }
+
+    let mut break_flag = false;
+    input = MEM_REGEX
+      .replace(&input, |cap: &Captures| {
+        if memory.len() == 0 {
+          println!("No memory at the moment.\n");
+          break_flag = true;
+          return "".to_string();
+        }
+        let index = match cap.get(1).unwrap().as_str().parse::<usize>() {
+          Ok(i) => i,
+          Err(_) => {
+            println!(
+              "Convert {}'s index failed. Valid range is from 1 to {}.\n",
+              cap.get(0).unwrap().as_str(),
+              memory.len()
+            );
+            break_flag = true;
+            return "".to_string();
+          }
+        };
+        if index > memory.len() || index == 0 {
+          println!(
+            "{} exceed valid memory slots. Valid range is from 1 to {}.\n",
+            cap.get(0).unwrap().as_str(),
+            memory.len()
+          );
+          break_flag = true;
+          return "".to_string();
+        }
+        return memory[memory.len() - index].to_string();
+      })
+      .into_owned();
+    if break_flag {
+      continue 'control;
     }
 
     let mut new_str: String = String::new();
