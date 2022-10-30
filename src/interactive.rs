@@ -10,13 +10,27 @@ lazy_static! {
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut rl = Editor::<()>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
   let mut memory: Vec<Value> = Vec::new();
+
   'control: loop {
     let mut input = match rl.readline("input> ") {
       Ok(s) => s,
       Err(_) => break,
     };
-    if input.trim() == "exit" {
-      break;
+    match input.trim() {
+      "exit" => break,
+      "_memlen" => {
+        println!("{}\n", memory.len());
+        continue 'control;
+      }
+      "_memval" => {
+        memory
+          .iter()
+          .enumerate()
+          .for_each(|(index, v)| println!("{}: {:?}", index, v));
+        println!();
+        continue 'control;
+      }
+      _ => {}
     }
     if let Some(cap) = BASE_REGEX.captures(&input) {
       let new_base = match cap.get(1).unwrap().as_str().parse::<u32>() {

@@ -50,4 +50,6 @@ Application behaviors that are not provided by `evalexpr` crate.
 5. `float` function to force floating number type.
 6. `bits` and `bits_t` function to count set bits in the input. `bits` prints the result as a string while `bits_t` will output `evalexpr` crates `Tuple` type.
 7. Make `or`, `and`, `xor`, `not` aliases for `bitor`, `bitand`, `bitxor`, `bitnot`.
-8. A memory storage in the interactive mode that can retrieve the previous result by `$#` where `$#` is the #th earliest result, `$-#` is the #th most recent result.
+8. A memory storage in the interactive mode that can retrieve the previous result by `$#` where `$#` is the #th result, `$-#` is the #th least result.
+    Added pre-processed commands `_memlen` and `_memval` to inspect memory storage.
+
