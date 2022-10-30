@@ -4,7 +4,7 @@ use rustyline::{Config, Editor};
 
 lazy_static! {
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
-  static ref MEM_REGEX: Regex = Regex::new(r"\$(\d+)").unwrap();
+  static ref MEM_REGEX: Regex = Regex::new(r"\$(-)?(\d+)").unwrap();
 }
 
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
@@ -39,28 +39,40 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
           break_flag = true;
           return "".to_string();
         }
-        let index = match cap.get(1).unwrap().as_str().parse::<usize>() {
+        let index = match cap.get(2).unwrap().as_str().parse::<usize>() {
           Ok(i) => i,
           Err(_) => {
+            println!("Convert {}'s index failed.\n", cap.get(0).unwrap().as_str());
+            break_flag = true;
+            return "".to_string();
+          }
+        };
+        if cap.get(1).is_some() {
+          if index > memory.len() || index == 0 {
             println!(
-              "Convert {}'s index failed. Valid range is from 1 to {}.\n",
+              "{} exceed valid memory slots. Valid range is from 1 to {}.\n",
               cap.get(0).unwrap().as_str(),
               memory.len()
             );
             break_flag = true;
             return "".to_string();
           }
-        };
-        if index > memory.len() || index == 0 {
-          println!(
-            "{} exceed valid memory slots. Valid range is from 1 to {}.\n",
-            cap.get(0).unwrap().as_str(),
-            memory.len()
-          );
-          break_flag = true;
-          return "".to_string();
+        } else {
+          if index >= memory.len() {
+            println!(
+              "{} exceed valid memory slots. Valid range is from 0 to {}.\n",
+              cap.get(0).unwrap().as_str(),
+              memory.len()
+            );
+            break_flag = true;
+            return "".to_string();
+          }
         }
-        return memory[memory.len() - index].to_string();
+        if cap.get(1).is_some() {
+          return memory[memory.len() - index].to_string();
+        } else {
+          return memory[index].to_string();
+        }
       })
       .into_owned();
     if break_flag {
