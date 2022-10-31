@@ -1,3 +1,5 @@
+use std::num::TryFromIntError;
+
 use super::*;
 
 pub fn print_val(val: &Value, base: u32) {
@@ -23,6 +25,13 @@ pub fn print_val(val: &Value, base: u32) {
 }
 
 fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
+  let a_ascii_code: u8 = 'A'
+    .try_into()
+    .map_err(|e: std::char::TryFromCharError| e.to_string())?;
+  let zero_ascii_code: u8 = '0'
+    .try_into()
+    .map_err(|e: std::char::TryFromCharError| e.to_string())?;
+
   if base > 36 || base < 2 {
     return Err("Invalid base".into());
   }
@@ -31,12 +40,14 @@ fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
   }
   let mut result = String::new();
   let mut exp = 0;
-  let int = int as IntType;
-  let base = base as UintType;
+  let base: UintType = base.into();
   if int < 0 {
     result.insert(0, '-');
   }
-  let mut abs = int.abs() as UintType;
+  let mut abs = int
+    .abs()
+    .try_into()
+    .map_err(|e: TryFromIntError| e.to_string())?;
   loop {
     exp += 1;
     let tmp = base.pow(exp);
@@ -47,13 +58,15 @@ fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
   exp -= 1;
   loop {
     let tmp_base = base.pow(exp);
-    let digit: u8 = (abs / tmp_base) as u8;
+    let digit: u8 = (abs / tmp_base)
+      .try_into()
+      .map_err(|e: TryFromIntError| e.to_string())?;
     if digit >= 10 {
-      result.insert(result.len(), ('A' as u8 + (digit - 10)) as char);
+      result.insert(result.len(), (a_ascii_code + (digit - 10)).into());
     } else {
-      result.insert(result.len(), ('0' as u8 + (digit)) as char);
+      result.insert(result.len(), (zero_ascii_code + (digit)).into());
     }
-    abs -= digit as UintType * tmp_base;
+    abs = abs - UintType::from(digit) * tmp_base;
     if exp == 0 {
       break;
     } else {

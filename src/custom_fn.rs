@@ -64,12 +64,12 @@ pub fn add_custom_function(context: &mut HashMapContext) {
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u8::MAX as IntType {
+    if *int < 0 || *int > u8::MAX.into() {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 8 bit width".into(),
       ));
     }
-    return Ok(*int as u8);
+    return (*int).try_into().to_eval_result();
   } else {
     return Err(EvalexprError::CustomMessage(format!(
       "Value {:?} is not int",
@@ -79,8 +79,11 @@ fn to_u8(val: &Value) -> EvalexprResult<u8> {
 }
 
 fn float(val: &Value) -> EvalexprResult<Value> {
-  if let Value::Int(int) = val {
-    let f = *int as f64;
+  if val.is_float() {
+    return Ok(val.clone());
+  } else if let Value::Int(int) = val {
+    // f64 can only be converted from i32 without data loss
+    let f = i32::try_from(*int).to_eval_result()?.into();
     return Ok(Value::Float(f));
   } else {
     return Err(EvalexprError::CustomMessage(format!(
@@ -92,12 +95,12 @@ fn float(val: &Value) -> EvalexprResult<Value> {
 
 fn to_u16(val: &Value) -> EvalexprResult<u16> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u16::MAX as IntType {
+    if *int < 0 || *int > u16::MAX.into() {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 16 bit width".into(),
       ));
     }
-    return Ok(*int as u16);
+    return (*int).try_into().to_eval_result();
   } else {
     return Err(EvalexprError::CustomMessage(format!(
       "Value {:?} is not int",
@@ -108,12 +111,12 @@ fn to_u16(val: &Value) -> EvalexprResult<u16> {
 
 fn to_u32(val: &Value) -> EvalexprResult<u32> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u32::MAX as IntType {
+    if *int < 0 || *int > u32::MAX.into() {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 32 bit width".into(),
       ));
     }
-    return Ok(*int as u32);
+    return (*int).try_into().to_eval_result();
   } else {
     return Err(EvalexprError::CustomMessage(format!(
       "Value {:?} is not int",
@@ -124,12 +127,12 @@ fn to_u32(val: &Value) -> EvalexprResult<u32> {
 
 fn to_u64(val: &Value) -> EvalexprResult<u64> {
   if let Value::Int(int) = val {
-    if *int < 0 || *int > u64::MAX as IntType {
+    if *int < 0 || *int > u64::MAX.into() {
       return Err(EvalexprError::CustomMessage(
         "Value exceed 36 bit width".into(),
       ));
     }
-    return Ok(*int as u64);
+    return (*int).try_into().to_eval_result();
   } else {
     return Err(EvalexprError::CustomMessage(format!(
       "Value {:?} is not int",
@@ -139,7 +142,7 @@ fn to_u64(val: &Value) -> EvalexprResult<u64> {
 }
 
 fn not8(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u8(val)?) as IntType));
+  return Ok(Value::Int(IntType::from(!(to_u8(val)?))));
 }
 
 fn or8(val: &Value) -> EvalexprResult<Value> {
@@ -152,7 +155,7 @@ fn or8(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u8(&args[0])?;
     let b = to_u8(&args[1])?;
-    return Ok(Value::Int((a | b) as IntType));
+    return Ok(Value::Int((a | b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -171,7 +174,7 @@ fn and8(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u8(&args[0])?;
     let b = to_u8(&args[1])?;
-    return Ok(Value::Int((a & b) as IntType));
+    return Ok(Value::Int((a & b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -190,7 +193,7 @@ fn xor8(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u8(&args[0])?;
     let b = to_u8(&args[1])?;
-    return Ok(Value::Int((a ^ b) as IntType));
+    return Ok(Value::Int((a ^ b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -200,7 +203,7 @@ fn xor8(val: &Value) -> EvalexprResult<Value> {
 }
 
 fn not16(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u16(val)?) as IntType));
+  return Ok(Value::Int(IntType::from(!(to_u16(val)?))));
 }
 
 fn or16(val: &Value) -> EvalexprResult<Value> {
@@ -213,7 +216,7 @@ fn or16(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u16(&args[0])?;
     let b = to_u16(&args[1])?;
-    return Ok(Value::Int((a | b) as IntType));
+    return Ok(Value::Int((a | b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -232,7 +235,7 @@ fn and16(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u16(&args[0])?;
     let b = to_u16(&args[1])?;
-    return Ok(Value::Int((a & b) as IntType));
+    return Ok(Value::Int((a & b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -251,7 +254,7 @@ fn xor16(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u16(&args[0])?;
     let b = to_u16(&args[1])?;
-    return Ok(Value::Int((a ^ b) as IntType));
+    return Ok(Value::Int((a ^ b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -261,7 +264,7 @@ fn xor16(val: &Value) -> EvalexprResult<Value> {
 }
 
 fn not32(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u32(val)?) as IntType));
+  return Ok(Value::Int(IntType::from(!(to_u32(val)?))));
 }
 
 fn or32(val: &Value) -> EvalexprResult<Value> {
@@ -274,7 +277,7 @@ fn or32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
-    return Ok(Value::Int((a | b) as IntType));
+    return Ok(Value::Int((a | b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -293,7 +296,7 @@ fn and32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
-    return Ok(Value::Int((a & b) as IntType));
+    return Ok(Value::Int((a & b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -312,7 +315,7 @@ fn xor32(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u32(&args[0])?;
     let b = to_u32(&args[1])?;
-    return Ok(Value::Int((a ^ b) as IntType));
+    return Ok(Value::Int((a ^ b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -322,7 +325,7 @@ fn xor32(val: &Value) -> EvalexprResult<Value> {
 }
 
 fn not64(val: &Value) -> EvalexprResult<Value> {
-  return Ok(Value::Int(!(to_u64(val)?) as IntType));
+  return Ok(Value::Int(IntType::from(!(to_u64(val)?))));
 }
 
 fn or64(val: &Value) -> EvalexprResult<Value> {
@@ -335,7 +338,7 @@ fn or64(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u64(&args[0])?;
     let b = to_u64(&args[1])?;
-    return Ok(Value::Int((a | b) as IntType));
+    return Ok(Value::Int((a | b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -354,7 +357,7 @@ fn and64(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u64(&args[0])?;
     let b = to_u64(&args[1])?;
-    return Ok(Value::Int((a & b) as IntType));
+    return Ok(Value::Int((a & b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -373,7 +376,7 @@ fn xor64(val: &Value) -> EvalexprResult<Value> {
     }
     let a = to_u64(&args[0])?;
     let b = to_u64(&args[1])?;
-    return Ok(Value::Int((a ^ b) as IntType));
+    return Ok(Value::Int((a ^ b).into()));
   } else {
     return Err(EvalexprError::WrongFunctionArgumentAmount {
       expected: 2,
@@ -395,30 +398,20 @@ fn count_bits(val: UintType) -> Result<Vec<IntType>, TryFromIntError> {
 }
 
 fn bits(val: &Value) -> EvalexprResult<Value> {
-  return count_bits(
-    val
-      .as_int()?
-      .try_into()
-      .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))?,
-  )
-  .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))
-  .map(|v| {
-    Value::String(
-      v.iter()
-        .map(|i| i.to_string())
-        .collect::<Vec<String>>()
-        .join(", "),
-    )
-  });
+  return count_bits(val.as_int()?.try_into().to_eval_result()?)
+    .to_eval_result()
+    .map(|v| {
+      Value::String(
+        v.iter()
+          .map(|i| i.to_string())
+          .collect::<Vec<String>>()
+          .join(", "),
+      )
+    });
 }
 
 fn bits_t(val: &Value) -> EvalexprResult<Value> {
-  return count_bits(
-    val
-      .as_int()?
-      .try_into()
-      .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))?,
-  )
-  .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))
-  .map(|v| Value::Tuple(v.iter().map(|i| Value::Int(*i)).collect()));
+  return count_bits(val.as_int()?.try_into().to_eval_result()?)
+    .to_eval_result()
+    .map(|v| Value::Tuple(v.iter().map(|i| Value::Int(*i)).collect()));
 }

@@ -2,12 +2,12 @@
 extern crate lazy_static;
 
 use evalexpr::*;
+mod base;
 mod custom_fn;
 mod display;
 mod interactive;
 mod pre_processor;
-
-type UintType = u128;
+use base::*;
 
 const HELP_MSG: &str = r#"A cli calculator highly depends on crate https://github.com/ISibboI/evalexpr.
 Check readme on its github page for the expression syntax.
