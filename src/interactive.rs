@@ -10,6 +10,7 @@ lazy_static! {
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut rl = Editor::<()>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
   let mut memory: Vec<Value> = Vec::new();
+  let mut echo = false;
 
   'control: loop {
     let mut input = match rl.readline("input> ") {
@@ -28,6 +29,10 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
           .enumerate()
           .for_each(|(index, v)| println!("{}: {:?}", index, v));
         println!();
+        continue 'control;
+      }
+      "_echo" => {
+        echo = !echo;
         continue 'control;
       }
       _ => {}
@@ -127,6 +132,9 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     input = new_str;
 
     input = pre_processor::pre_process(&input);
+    if echo {
+      println!("{}", &input);
+    }
     match eval_with_context_mut(&input, context) {
       Ok(result) => {
         display::print_val(&result, base);
