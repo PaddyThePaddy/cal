@@ -1,5 +1,6 @@
 # Command line calculator
-A wrapper application of https://github.com/ISibboI/evalexpr with some minor tweaks.
+A wrapper application of https://github.com/ISibboI/evalexpr with some minor tweaks.  
+The evalexpr used in this repository is [forked](https://github.com/PaddyThePaddy/evalexpr) to support bit operators and maximum data type(i128)
 
 # Execution mode:
 1. Parameter: 
@@ -31,7 +32,7 @@ input> 1 + 2
 ```
 
 # Additional features
-Application behaviors that are not provided by `evalexpr` crate.
+Application behaviors that are not provided by the original `evalexpr` crate.
 
 1. Change output base with command line flags, or by `base = #` or `base(#)` command in the interactive mode.
 2. Pre-processed alias: (case insensitive)
@@ -52,4 +53,5 @@ Application behaviors that are not provided by `evalexpr` crate.
 7. Make `or`, `and`, `xor`, `not` aliases for `bitor`, `bitand`, `bitxor`, `bitnot`.
 8. A memory storage in the interactive mode that can retrieve the previous result by `$#` where `$#` is the #th result, `$-#` is the #th least result.
     Added pre-processed commands `_memlen` and `_memval` to inspect memory storage.
+9. BitAnd ("&"), BitOr ("|"), BitXor ("^^") operator.
 
