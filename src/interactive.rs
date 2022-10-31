@@ -33,6 +33,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
       }
       "_echo" => {
         echo = !echo;
+        println!("echo: {}\n", echo);
         continue 'control;
       }
       _ => {}
@@ -133,7 +134,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
 
     input = pre_processor::pre_process(&input);
     if echo {
-      println!("{}", &input);
+      println!("echo: {}", &input);
     }
     match eval_with_context_mut(&input, context) {
       Ok(result) => {
