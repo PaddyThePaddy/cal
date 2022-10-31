@@ -13,7 +13,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut echo = false;
 
   'control: loop {
-    let mut input = match rl.readline("input> ") {
+    let mut input = match rl.readline("cal> ") {
       Ok(s) => s,
       Err(_) => break,
     };
