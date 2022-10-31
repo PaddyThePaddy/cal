@@ -138,8 +138,13 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     }
     match eval_with_context_mut(&input, context) {
       Ok(result) => {
-        display::print_val(&result, base);
-        memory.push(result)
+        match display::val_to_string(&result, base) {
+          Ok(s) => {
+            println!("{}", s);
+            memory.push(result)
+          }
+          Err(s) => println!("{}", s),
+        };
       }
       Err(e) => println!("{}", e),
     }

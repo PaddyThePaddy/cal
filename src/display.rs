@@ -2,26 +2,23 @@ use std::num::TryFromIntError;
 
 use super::*;
 
-pub fn print_val(val: &Value, base: u32) {
-  match val {
-    Value::String(s) => println!("{}", s),
+pub fn val_to_string(val: &Value, base: u32) -> Result<String, String> {
+  Ok(match val {
+    Value::String(s) => format!("{}", s),
     Value::Int(result) => {
-      println!(
-        "{}",
-        convert_to_string(*result, base).expect("Convert int to string failed")
-      )
+      format!("{}", convert_to_string(*result, base)?)
     }
-    Value::Boolean(b) => println!("{}", b),
+    Value::Boolean(b) => format!("{}", b),
     Value::Float(f) => {
       if f.floor() == *f {
-        println!("{:.1}", f);
+        format!("{:.1}", f)
       } else {
-        println!("{}", f)
+        format!("{}", f)
       }
     }
-    Value::Empty => println!("()"),
-    Value::Tuple(t) => println!("{:?}", t),
-  }
+    Value::Empty => format!("None"),
+    Value::Tuple(t) => format!("{:?}", t),
+  })
 }
 
 fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
@@ -33,7 +30,7 @@ fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
     .map_err(|e: std::char::TryFromCharError| e.to_string())?;
 
   if base > 36 || base < 2 {
-    return Err("Invalid base".into());
+    return Err(format!("Invalid base: {}", base));
   }
   if int == 0 {
     return Ok("0".into());
@@ -74,4 +71,14 @@ fn convert_to_string(int: IntType, base: u32) -> Result<String, String> {
     }
   }
   return Ok(result);
+}
+
+#[test]
+fn test_radix() {
+  assert_eq!(convert_to_string(10, 2), Ok("1010".into()));
+  assert_eq!(convert_to_string(10, 1), Err("Invalid base: 1".into()));
+  assert_eq!(convert_to_string(10, 37), Err("Invalid base: 37".into()));
+  assert_eq!(convert_to_string(35, 36), Ok("Z".into()));
+  assert_eq!(convert_to_string(36, 36), Ok("10".into()));
+  assert_eq!(convert_to_string(71, 36), Ok("1Z".into()));
 }

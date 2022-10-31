@@ -85,3 +85,9 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
   // });
   return result;
 }
+
+#[test]
+fn test_pre_processor() {
+  assert_eq!(pre_process("bit5 bIt11 1KB 2MB 3GB 4TB 5PB 0xff eeh 0b11 100b 0o77 70o or xor and not"),
+  "shl(1, 5) shl(1, 11) (1 * 1024) (2 * 1024 * 1024) (3 * 1024 * 1024 * 1024) (4 * 1024 * 1024 * 1024 * 1024) (5 * 1024 * 1024 * 1024 * 1024 * 1024) 255 238 3 4 63 56 bitor bitxor bitand bitnot");
+}

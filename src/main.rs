@@ -89,6 +89,9 @@ fn main() {
     let formula = pre_processor::pre_process(&items.join(" "));
     let result = eval_with_context_mut(&formula, &mut context)
       .unwrap_or_else(|e| Value::String(format!("{}", e)));
-    display::print_val(&result, base);
+    match display::val_to_string(&result, base) {
+      Ok(result) => println!("{}", result),
+      Err(msg) => println!("{}", msg),
+    };
   }
 }
