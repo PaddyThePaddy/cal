@@ -18,22 +18,22 @@ lazy_static! {
 
 pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String {
   let mut result: String;
-  result = BIT_FN_REGEX.replace(input, "bit$1").into();
-  result = BIT_REGEX.replace(&result, "shl(1, $1)").into();
-  result = KB_REGEX.replace(&result, "($1 * 1024)").into();
-  result = MB_REGEX.replace(&result, "($1 * 1024 * 1024)").into();
+  result = BIT_FN_REGEX.replace_all(input, "bit$1").into();
+  result = BIT_REGEX.replace_all(&result, "shl(1, $1)").into();
+  result = KB_REGEX.replace_all(&result, "($1 * 1024)").into();
+  result = MB_REGEX.replace_all(&result, "($1 * 1024 * 1024)").into();
   result = GB_REGEX
-    .replace(&result, "($1 * 1024 * 1024 * 1024)")
+    .replace_all(&result, "($1 * 1024 * 1024 * 1024)")
     .into();
   result = TB_REGEX
-    .replace(&result, "($1 * 1024 * 1024 * 1024 * 1024)")
+    .replace_all(&result, "($1 * 1024 * 1024 * 1024 * 1024)")
     .into();
   result = PB_REGEX
-    .replace(&result, "($1 * 1024 * 1024 * 1024 * 1024 * 1024)")
+    .replace_all(&result, "($1 * 1024 * 1024 * 1024 * 1024 * 1024)")
     .into();
 
   result = HEX_REGEX1
-    .replace(&result, |cap: &Captures| {
+    .replace_all(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 16)
         .unwrap()
         .to_string()
@@ -41,7 +41,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
     .into_owned();
 
   result = HEX_REGEX2
-    .replace(&result, |cap: &Captures| {
+    .replace_all(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 16)
         .unwrap()
         .to_string()
@@ -49,7 +49,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
     .into_owned();
 
   result = BIN_REGEX1
-    .replace(&result, |cap: &Captures| {
+    .replace_all(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 2)
         .unwrap()
         .to_string()
@@ -57,7 +57,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
     .into_owned();
 
   result = BIN_REGEX2
-    .replace(&result, |cap: &Captures| {
+    .replace_all(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 2)
         .unwrap()
         .to_string()
@@ -65,7 +65,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
     .into_owned();
 
   result = OCT_REGEX1
-    .replace(&result, |cap: &Captures| {
+    .replace_all(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
         .unwrap()
         .to_string()
@@ -73,14 +73,14 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
     .into_owned();
 
   result = OCT_REGEX2
-    .replace(&result, |cap: &Captures| {
+    .replace_all(&result, |cap: &Captures| {
       u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
         .unwrap()
         .to_string()
     })
     .into_owned();
   // vars.iter().for_each(|(key, val)| {
-  //     result = result.replace(key, val);
+  //     result = result.replace_all(key, val);
   // });
   return result;
 }
