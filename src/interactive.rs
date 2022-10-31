@@ -53,7 +53,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
 
     let mut break_flag = false;
     input = MEM_REGEX
-      .replace(&input, |cap: &Captures| {
+      .replace_all(&input, |cap: &Captures| {
         if memory.len() == 0 {
           println!("No memory at the moment.\n");
           break_flag = true;
@@ -98,39 +98,6 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     if break_flag {
       continue 'control;
     }
-
-    let mut new_str: String = String::new();
-    let mut pre_end = 0;
-    for m in MEM_REGEX.captures_iter(&input) {
-      if memory.len() == 0 {
-        println!("No memory at the moment.\n");
-        continue 'control;
-      }
-      new_str += &input[pre_end..m.get(0).unwrap().start()];
-      let index = match m.get(1).unwrap().as_str().parse::<usize>() {
-        Ok(i) => i,
-        Err(_) => {
-          println!(
-            "Convert {}'s index failed. Valid range is from 1 to {}.\n",
-            m.get(0).unwrap().as_str(),
-            memory.len()
-          );
-          continue 'control;
-        }
-      };
-      if index > memory.len() || index == 0 {
-        println!(
-          "{} exceed valid memory slots. Valid range is from 1 to {}.\n",
-          m.get(0).unwrap().as_str(),
-          memory.len()
-        );
-        continue 'control;
-      }
-      new_str = memory[memory.len() - index].to_string();
-      pre_end = m.get(0).unwrap().end();
-    }
-    new_str += &input[pre_end..];
-    input = new_str;
 
     input = pre_processor::pre_process(&input);
     if echo {
