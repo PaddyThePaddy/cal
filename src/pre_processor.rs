@@ -1,3 +1,4 @@
+use super::*;
 use regex::{Captures, Regex};
 
 lazy_static! {
@@ -34,7 +35,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
 
   result = HEX_REGEX1
     .replace_all(&result, |cap: &Captures| {
-      u128::from_str_radix(cap.get(1).unwrap().as_str(), 16)
+      UintType::from_str_radix(cap.get(1).unwrap().as_str(), 16)
         .unwrap()
         .to_string()
     })
@@ -42,7 +43,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
 
   result = HEX_REGEX2
     .replace_all(&result, |cap: &Captures| {
-      u128::from_str_radix(cap.get(1).unwrap().as_str(), 16)
+      UintType::from_str_radix(cap.get(1).unwrap().as_str(), 16)
         .unwrap()
         .to_string()
     })
@@ -50,7 +51,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
 
   result = BIN_REGEX1
     .replace_all(&result, |cap: &Captures| {
-      u128::from_str_radix(cap.get(1).unwrap().as_str(), 2)
+      UintType::from_str_radix(cap.get(1).unwrap().as_str(), 2)
         .unwrap()
         .to_string()
     })
@@ -58,7 +59,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
 
   result = BIN_REGEX2
     .replace_all(&result, |cap: &Captures| {
-      u128::from_str_radix(cap.get(1).unwrap().as_str(), 2)
+      UintType::from_str_radix(cap.get(1).unwrap().as_str(), 2)
         .unwrap()
         .to_string()
     })
@@ -66,7 +67,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
 
   result = OCT_REGEX1
     .replace_all(&result, |cap: &Captures| {
-      u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
+      UintType::from_str_radix(cap.get(1).unwrap().as_str(), 8)
         .unwrap()
         .to_string()
     })
@@ -74,7 +75,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
 
   result = OCT_REGEX2
     .replace_all(&result, |cap: &Captures| {
-      u128::from_str_radix(cap.get(1).unwrap().as_str(), 8)
+      UintType::from_str_radix(cap.get(1).unwrap().as_str(), 8)
         .unwrap()
         .to_string()
     })

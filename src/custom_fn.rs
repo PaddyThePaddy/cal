@@ -1,4 +1,6 @@
-use evalexpr::*;
+use std::num::TryFromIntError;
+
+use super::*;
 
 pub fn add_custom_function(context: &mut HashMapContext) {
   context
@@ -380,40 +382,43 @@ fn xor64(val: &Value) -> EvalexprResult<Value> {
   }
 }
 
-fn bits(val: &Value) -> EvalexprResult<Value> {
-  if let Value::Int(int) = val {
-    let int = *int as u128;
-    let mut result: Vec<String> = Vec::new();
-    for i in 0..128 {
-      if int & 1 << i != 0 {
-        result.push(i.to_string());
-      }
-    }
+fn count_bits(val: UintType) -> Result<Vec<IntType>, TryFromIntError> {
+  let mut result = Vec::new();
+  let bit_width = (std::mem::size_of::<UintType>() * 8).try_into()?;
 
-    return Ok(Value::String(result.join(", ")));
-  } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
+  for i in 0..bit_width {
+    if val & (1 << i) != 0 {
+      result.push(i.try_into()?);
+    }
   }
+  return Ok(result);
+}
+
+fn bits(val: &Value) -> EvalexprResult<Value> {
+  return count_bits(
+    val
+      .as_int()?
+      .try_into()
+      .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))?,
+  )
+  .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))
+  .map(|v| {
+    Value::String(
+      v.iter()
+        .map(|i| i.to_string())
+        .collect::<Vec<String>>()
+        .join(", "),
+    )
+  });
 }
 
 fn bits_t(val: &Value) -> EvalexprResult<Value> {
-  if let Value::Int(int) = val {
-    let int = *int as u128;
-    let mut result = Vec::new();
-    for i in 0..128 {
-      if int & 1 << i != 0 {
-        result.push(Value::Int(i.into()));
-      }
-    }
-
-    return Ok(Value::Tuple(result));
-  } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
-  }
+  return count_bits(
+    val
+      .as_int()?
+      .try_into()
+      .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))?,
+  )
+  .map_err(|e: TryFromIntError| EvalexprError::CustomMessage(e.to_string()))
+  .map(|v| Value::Tuple(v.iter().map(|i| Value::Int(*i)).collect()));
 }
