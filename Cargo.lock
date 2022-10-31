@@ -147,7 +147,7 @@ dependencies = [
 [[package]]
 name = "evalexpr"
 version = "8.1.0"
-source = "git+https://github.com/PaddyThePaddy/evalexpr?branch=main#802d9a015db543a53f640ce5c76d24bd0ba08c0e"
+source = "git+https://github.com/PaddyThePaddy/evalexpr?rev=8606298ee8a9559d8e197db0d6fabbfb2dde6d65#8606298ee8a9559d8e197db0d6fabbfb2dde6d65"
 
 [[package]]
 name = "fd-lock"
