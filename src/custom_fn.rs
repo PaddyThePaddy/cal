@@ -60,6 +60,12 @@ pub fn add_custom_function(context: &mut HashMapContext) {
   context
     .set_function("float".into(), Function::new(float))
     .unwrap();
+  context
+    .set_function("sig".into(), Function::new(sig))
+    .unwrap();
+  context
+    .set_function("sig_le".into(), Function::new(sig_le))
+    .unwrap();
 }
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
@@ -414,4 +420,30 @@ fn bits_t(val: &Value) -> EvalexprResult<Value> {
   return count_bits(val.as_int()?.try_into().to_eval_result()?)
     .to_eval_result()
     .map(|v| Value::Tuple(v.iter().map(|i| Value::Int(*i)).collect()));
+}
+
+fn sig(val: &Value) -> EvalexprResult<Value> {
+  if let Value::Int(int) = val {
+    let mut sig = String::new();
+    let mut uint: UintType = (*int).try_into().to_eval_result()?;
+    while uint != 0 {
+      let ch = char::from(u8::try_from(uint & 0xFF).to_eval_result()?);
+      sig.insert(0, ch);
+      uint = uint >> 8;
+    }
+    return Ok(Value::String(sig));
+  } else {
+    return Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    });
+  }
+}
+
+fn sig_le(val: &Value) -> EvalexprResult<Value> {
+  sig(val).map(|val| {
+    if let Value::String(s) = val {
+      return Value::String(String::from_iter(s.chars().rev()));
+    }
+    return val;
+  })
 }
