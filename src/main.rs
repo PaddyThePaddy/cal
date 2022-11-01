@@ -89,7 +89,11 @@ fn main() {
     let result = eval_with_context_mut(&formula, &mut context)
       .unwrap_or_else(|e| Value::String(format!("{}", e)));
     match display::val_to_string(&result, base) {
-      Ok(result) => println!("{}", result),
+      Ok(result) => {
+        if let Some(s) = result {
+          println!("{}", s)
+        }
+      }
       Err(msg) => println!("{}", msg),
     };
   }

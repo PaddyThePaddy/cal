@@ -113,9 +113,11 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     match eval_with_context_mut(&input, context) {
       Ok(result) => {
         match display::val_to_string(&result, base) {
-          Ok(s) => {
-            println!("{}", s);
-            memory.push(result)
+          Ok(r) => {
+            if let Some(s) = r {
+              println!("{}", s);
+              memory.push(result)
+            }
           }
           Err(s) => println!("{}", s),
         };

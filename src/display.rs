@@ -2,22 +2,20 @@ use std::num::TryFromIntError;
 
 use super::*;
 
-pub fn val_to_string(val: &Value, base: u32) -> Result<String, String> {
+pub fn val_to_string(val: &Value, base: u32) -> Result<Option<String>, String> {
   Ok(match val {
-    Value::String(s) => format!("{}", s),
-    Value::Int(result) => {
-      format!("{}", convert_to_string(*result, base)?)
-    }
-    Value::Boolean(b) => format!("{}", b),
+    Value::String(s) => Some(format!("{}", s)),
+    Value::Int(result) => Some(format!("{}", convert_to_string(*result, base)?)),
+    Value::Boolean(b) => Some(format!("{}", b)),
     Value::Float(f) => {
       if f.floor() == *f {
-        format!("{:.1}", f)
+        Some(format!("{:.1}", f))
       } else {
-        format!("{}", f)
+        Some(format!("{}", f))
       }
     }
-    Value::Empty => format!("None"),
-    Value::Tuple(t) => format!("{:?}", t),
+    Value::Tuple(t) => Some(format!("{:?}", t)),
+    Value::Empty => None,
   })
 }
 
