@@ -20,6 +20,7 @@ fn build_arg() -> clap::ArgMatches {
     .author("paddythepaddy@duck.com")
     .version(git_version::git_version!())
     .about(HELP_MSG)
+    .after_long_help(std::include_str!("../readme.md"))
     .arg(
       clap::Arg::new("output_base")
         .short('B')
