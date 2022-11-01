@@ -21,6 +21,7 @@ fn build_arg() -> clap::ArgMatches {
     .version(git_version::git_version!())
     .about(HELP_MSG)
     .after_long_help(std::include_str!("../readme.md"))
+    .after_help("Detail on github: https://github.com/PaddyThePaddy/cal")
     .arg(
       clap::Arg::new("output_base")
         .short('B')
