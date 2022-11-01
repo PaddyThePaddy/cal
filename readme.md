@@ -54,5 +54,5 @@ Application behaviors that are not provided by the original `evalexpr` crate.
 8. A memory storage in the interactive mode that can retrieve the previous result by `$#` where `$#` is the #th result, `$-#` is the #th least result.
     Added pre-processed commands `_memlen` and `_memval` to inspect memory storage.
 9. BitAnd ("&"), BitOr ("|"), BitXor ("^^") operator.
-10. `sig` and `sig_le` function to convert integer to signature string. ex: `sig 0x41435041` => `ACPA`.
-
+10. `sig` and `sig_le` function to convert integer to signature string. ex: `sig 0x41435041` => `ACPA`.  
+    `to_sig` and `to_sig_le` to convert a signature string to integer.

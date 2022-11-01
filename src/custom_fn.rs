@@ -66,6 +66,12 @@ pub fn add_custom_function(context: &mut HashMapContext) {
   context
     .set_function("sig_le".into(), Function::new(sig_le))
     .unwrap();
+  context
+    .set_function("to_sig".into(), Function::new(to_sig))
+    .unwrap();
+  context
+    .set_function("to_sig_le".into(), Function::new(to_sig_le))
+    .unwrap();
 }
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
@@ -446,4 +452,35 @@ fn sig_le(val: &Value) -> EvalexprResult<Value> {
     }
     return val;
   })
+}
+
+fn to_sig(val: &Value) -> EvalexprResult<Value> {
+  if let Value::String(str) = val {
+    let mut sig = 0;
+    for c in str.chars() {
+      if !c.is_ascii() {
+        return Err(EvalexprError::CustomMessage(
+          "Only ascii characters are allowed".into(),
+        ));
+      }
+      sig <<= 8;
+      sig += IntType::from(u8::try_from(c).to_eval_result()?);
+    }
+    return Ok(Value::Int(sig));
+  } else {
+    return Err(EvalexprError::ExpectedString {
+      actual: val.clone(),
+    });
+  }
+}
+
+fn to_sig_le(val: &Value) -> EvalexprResult<Value> {
+  if let Value::String(str) = val {
+    let rev_str = String::from_iter(str.chars().rev());
+    return to_sig(&Value::String(rev_str));
+  } else {
+    return Err(EvalexprError::ExpectedString {
+      actual: val.clone(),
+    });
+  }
 }
