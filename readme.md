@@ -5,20 +5,22 @@ The evalexpr used in this repository is [forked](https://github.com/PaddyThePadd
 # Execution mode:
 1. Parameter: 
 ```
-> cal 1 + 2
-3
+  > cal 1 + 2
+  3
 ```
+
 2. Pipeline
 ```
-> echo '1 + 2' | cal
-3
+  > echo '1 + 2' | cal
+  3
 ```
+
 3. Interactive
 ```
-> cal
-base: 10
-input> 1 + 2
-3
+  > cal
+  base: 10
+  input> 1 + 2
+  3
 ```
 
 # Flags
