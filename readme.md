@@ -36,7 +36,7 @@ The evalexpr used in this repository is [forked](https://github.com/PaddyThePadd
 # Additional features
 Application behaviors that are not provided by the original `evalexpr` crate.
 
-1. Change output base with command line flags, or by `_base  #` or `_b #` command in the interactive mode.
+1. Change output radix base with command line flags, or by `_base  #` or `_b #` command in the interactive mode.
 2. Pre-processed alias: (case insensitive)
     1. `BIT#` -> `shl(1, #)`
     2. `#KB` -> `(# * 1024)`
