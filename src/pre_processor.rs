@@ -80,6 +80,7 @@ pub fn pre_process(input: &str /* , vars: &HashMap<String, String>*/) -> String 
         .to_string()
     })
     .into_owned();
+  result = result.replace("'", "\"");
   // vars.iter().for_each(|(key, val)| {
   //     result = result.replace_all(key, val);
   // });
