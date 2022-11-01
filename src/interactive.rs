@@ -3,7 +3,7 @@ use regex::{Captures, Regex};
 use rustyline::{Config, Editor};
 
 lazy_static! {
-  static ref BASE_REGEX: Regex = Regex::new(r"(?i)base\s*=?\(?\s*(\d+)\s*\)?").unwrap();
+  static ref BASE_REGEX: Regex = Regex::new(r"(?i)_(?:base|b)\s*=?\(?\s*(\d+)\s*\)?").unwrap();
   static ref MEM_REGEX: Regex = Regex::new(r"\$(-)?(\d+)").unwrap();
 }
 
