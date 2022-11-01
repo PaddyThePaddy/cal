@@ -83,10 +83,9 @@ fn to_u8(val: &Value) -> EvalexprResult<u8> {
     }
     return (*int).try_into().to_eval_result();
   } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
+    return Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    });
   }
 }
 
@@ -98,10 +97,9 @@ fn float(val: &Value) -> EvalexprResult<Value> {
     let f = i32::try_from(*int).to_eval_result()?.into();
     return Ok(Value::Float(f));
   } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
+    return Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    });
   }
 }
 
@@ -114,10 +112,9 @@ fn to_u16(val: &Value) -> EvalexprResult<u16> {
     }
     return (*int).try_into().to_eval_result();
   } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
+    return Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    });
   }
 }
 
@@ -130,10 +127,9 @@ fn to_u32(val: &Value) -> EvalexprResult<u32> {
     }
     return (*int).try_into().to_eval_result();
   } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
+    return Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    });
   }
 }
 
@@ -146,10 +142,9 @@ fn to_u64(val: &Value) -> EvalexprResult<u64> {
     }
     return (*int).try_into().to_eval_result();
   } else {
-    return Err(EvalexprError::CustomMessage(format!(
-      "Value {:?} is not int",
-      val
-    )));
+    return Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    });
   }
 }
 
