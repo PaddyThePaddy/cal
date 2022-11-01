@@ -27,6 +27,7 @@ fn build_arg() -> clap::ArgMatches {
         .short('B')
         .long("base")
         .action(clap::ArgAction::Set)
+        .value_parser(clap::value_parser!(u32).range(2..37))
         .default_value("10")
         .help("Change outputs radix. Only affects integer results"),
     )
@@ -71,11 +72,7 @@ fn main() {
   } else if args.get_flag("bin") {
     2
   } else {
-    args
-      .get_one::<String>("output_base")
-      .expect("Get output base failed")
-      .parse::<u32>()
-      .expect("Invalid base")
+    *args.get_one::<u32>("output_base").expect("Invalid base")
   };
   if !args.contains_id("formula") {
     if atty::is(atty::Stream::Stdin) {

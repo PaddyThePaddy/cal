@@ -46,6 +46,13 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
           continue;
         }
       };
+      if new_base < 2 || new_base > 36 {
+        println!(
+          "Invalid radix base: {}. Only 2-36 is supported.\n",
+          new_base
+        );
+        continue 'control;
+      }
       base = new_base;
       println!("new base = {}\n", base);
       continue;
