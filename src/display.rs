@@ -4,7 +4,7 @@ use super::*;
 
 pub fn val_to_string(val: &Value, base: u32) -> Result<Option<String>, String> {
   Ok(match val {
-    Value::String(s) => Some(format!("{}", s)),
+    Value::String(s) => Some(format!("\"{}\"", s)),
     Value::Int(result) => Some(format!("{}", convert_to_string(*result, base)?)),
     Value::Boolean(b) => Some(format!("{}", b)),
     Value::Float(f) => {

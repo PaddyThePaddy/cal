@@ -66,8 +66,8 @@ Application behaviors that are not provided by the original `evalexpr` crate.
     4.  `bytes` to split bytes in a uint
 
     Examples:
-    1. `ascii 0x41424344` -> `ABCD`
+    1. `ascii 0x41424344` -> `"ABCD"`
     2. `acii 'ABCD'` -> `[Int(65), Int(66), Int(67), Int(68)]`
     3. `com ascii 'ABCD'` -> `41424344` in base 16 mode
-    4. `ascii rev 0x41424344` -> `DCBA`
+    4. `ascii rev 0x41424344` -> `"DCBA"`
     5. `bytes 0x41424344` -> `[Int(65), Int(66), Int(67), Int(68)]`
