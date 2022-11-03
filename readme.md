@@ -19,7 +19,7 @@ The evalexpr used in this repository is [forked](https://github.com/PaddyThePadd
 ```
   > cal
   base: 10
-  input> 1 + 2
+  cal> 1 + 2
   3
 ```
 
