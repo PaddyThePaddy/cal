@@ -56,5 +56,18 @@ Application behaviors that are not provided by the original `evalexpr` crate.
 8. A memory storage in the interactive mode that can retrieve the previous result by `$#` where `$#` is the #th result, `$-#` is the #th least result.
     Added pre-processed commands `_memlen` and `_memval` to inspect memory storage.
 9. BitAnd ("&"), BitOr ("|"), BitXor ("^^") operator.
-10. `sig` and `sig_le` function to convert integer to signature string. ex: `sig 0x41435041` => `ACPA`.  
-    `to_sig` and `to_sig_le` to convert a signature string to integer.
+10. ASCII signature processing functions:
+    1.  `ascii` to convert:
+        1.  A single uint signature into string
+        2.  Uint array into string
+        3.  String into uint array
+    2.  `com` or `mer` to merge uint array into a single uint by big endian
+    3.  `rev` to reverse string, array or bytes in a single uint
+    4.  `bytes` to split bytes in a uint
+
+    Examples:
+    1. `ascii 0x41424344` -> `ABCD`
+    2. `acii 'ABCD'` -> `[Int(65), Int(66), Int(67), Int(68)]`
+    3. `com ascii 'ABCD'` -> `41424344` in base 16 mode
+    4. `ascii rev 0x41424344` -> `DCBA`
+    5. `bytes 0x41424344` -> `[Int(65), Int(66), Int(67), Int(68)]`

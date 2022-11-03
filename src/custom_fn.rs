@@ -61,16 +61,19 @@ pub fn add_custom_function(context: &mut HashMapContext) {
     .set_function("float".into(), Function::new(float))
     .unwrap();
   context
-    .set_function("sig".into(), Function::new(sig))
+    .set_function("ascii".into(), Function::new(ascii))
     .unwrap();
   context
-    .set_function("sig_le".into(), Function::new(sig_le))
+    .set_function("rev".into(), Function::new(rev))
     .unwrap();
   context
-    .set_function("to_sig".into(), Function::new(to_sig))
+    .set_function("com".into(), Function::new(merge))
     .unwrap();
   context
-    .set_function("to_sig_le".into(), Function::new(to_sig_le))
+    .set_function("mer".into(), Function::new(merge))
+    .unwrap();
+  context
+    .set_function("bytes".into(), Function::new(bytes))
     .unwrap();
 }
 
@@ -423,59 +426,108 @@ fn bits_t(val: &Value) -> EvalexprResult<Value> {
     .map(|v| Value::Tuple(v.iter().map(|i| Value::Int(*i)).collect()));
 }
 
-fn sig(val: &Value) -> EvalexprResult<Value> {
-  if let Value::Int(int) = val {
-    let mut sig = String::new();
-    let mut uint: UintType = (*int).try_into().to_eval_result()?;
-    while uint != 0 {
-      let ch = char::from(u8::try_from(uint & 0xFF).to_eval_result()?);
-      sig.insert(0, ch);
-      uint = uint >> 8;
-    }
-    return Ok(Value::String(sig));
-  } else {
-    return Err(EvalexprError::ExpectedInt {
-      actual: val.clone(),
-    });
-  }
-}
-
-fn sig_le(val: &Value) -> EvalexprResult<Value> {
-  sig(val).map(|val| {
-    if let Value::String(s) = val {
-      return Value::String(String::from_iter(s.chars().rev()));
-    }
-    return val;
-  })
-}
-
-fn to_sig(val: &Value) -> EvalexprResult<Value> {
-  if let Value::String(str) = val {
-    let mut sig = 0;
-    for c in str.chars() {
-      if !c.is_ascii() {
-        return Err(EvalexprError::CustomMessage(
-          "Only ascii characters are allowed".into(),
-        ));
+fn ascii(val: &Value) -> EvalexprResult<Value> {
+  match val {
+    Value::Int(int) => {
+      let mut ascii = String::new();
+      let mut uint: UintType = (*int).try_into().to_eval_result()?;
+      while uint != 0 {
+        let ch = char::from(u8::try_from(uint & 0xFF).to_eval_result()?);
+        ascii.insert(0, ch);
+        uint = uint >> 8;
       }
-      sig <<= 8;
-      sig += IntType::from(u8::try_from(c).to_eval_result()?);
+      return Ok(Value::String(ascii));
     }
-    return Ok(Value::Int(sig));
-  } else {
-    return Err(EvalexprError::ExpectedString {
-      actual: val.clone(),
-    });
+    Value::Tuple(vec) => {
+      let mut result = String::new();
+      for v in vec.into_iter() {
+        result.push(char::from(to_u8(&v)?));
+      }
+      return Ok(Value::String(result));
+    }
+    Value::String(s) => {
+      let mut result = Vec::new();
+      for c in s.chars() {
+        if !c.is_ascii() {
+          return Err(EvalexprError::CustomMessage(
+            "Only ascii characters are allowed".into(),
+          ));
+        }
+        result.push(Value::Int(IntType::from(u8::try_from(c).to_eval_result()?)));
+      }
+      return Ok(Value::Tuple(result));
+    }
+    _ => {
+      return Err(EvalexprError::ExpectedInt {
+        actual: val.clone(),
+      })
+    }
   }
 }
 
-fn to_sig_le(val: &Value) -> EvalexprResult<Value> {
-  if let Value::String(str) = val {
-    let rev_str = String::from_iter(str.chars().rev());
-    return to_sig(&Value::String(rev_str));
-  } else {
-    return Err(EvalexprError::ExpectedString {
+fn rev(val: &Value) -> EvalexprResult<Value> {
+  match val {
+    Value::String(s) => Ok(Value::String(String::from_iter(s.chars().rev()))),
+    Value::Int(n) => {
+      let mut uint: UintType = (*n).try_into().to_eval_result()?;
+      let mut output: UintType = 0;
+      while uint > 0 {
+        output = (output << 8) + (uint & 0xFF);
+        uint >>= 8;
+      }
+      return Ok(Value::Int(IntType::try_from(output).to_eval_result()?));
+    }
+    Value::Tuple(vec) => Ok(Value::Tuple(
+      vec.into_iter().map(|v| v.to_owned()).rev().collect(),
+    )),
+    _ => Err(EvalexprError::ExpectedInt {
       actual: val.clone(),
-    });
+    }),
+  }
+}
+
+fn merge(val: &Value) -> EvalexprResult<Value> {
+  match val {
+    Value::Tuple(vec) => {
+      let mut output: UintType = 0;
+      if vec.len() > std::mem::size_of::<UintType>() {
+        return Err(
+          format!(
+            "Array length exceed current data width ({}).",
+            std::mem::size_of::<UintType>()
+          )
+          .to_eval_error(),
+        );
+      }
+      for v in vec.iter() {
+        output = (output << 8) + UintType::from(to_u8(v)?);
+      }
+      return Ok(Value::Int(IntType::try_from(output).to_eval_result()?));
+    }
+    _ => {
+      return Err(EvalexprError::ExpectedTuple {
+        actual: val.clone(),
+      })
+    }
+  }
+}
+
+fn bytes(val: &Value) -> EvalexprResult<Value> {
+  match val {
+    Value::Int(n) => {
+      let mut uint: UintType = (*n).try_into().to_eval_result()?;
+      let mut result = Vec::new();
+      while uint > 0 {
+        result.insert(
+          0,
+          Value::Int(IntType::try_from(uint & 0xFF).to_eval_result()?),
+        );
+        uint >>= 8;
+      }
+      return Ok(Value::Tuple(result));
+    }
+    _ => Err(EvalexprError::ExpectedInt {
+      actual: val.clone(),
+    }),
   }
 }
