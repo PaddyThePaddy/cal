@@ -70,7 +70,13 @@ pub fn add_custom_function(context: &mut HashMapContext) {
     .set_function("com".into(), Function::new(merge))
     .unwrap();
   context
+    .set_function("combine".into(), Function::new(merge))
+    .unwrap();
+  context
     .set_function("mer".into(), Function::new(merge))
+    .unwrap();
+  context
+    .set_function("merge".into(), Function::new(merge))
     .unwrap();
   context
     .set_function("bytes".into(), Function::new(bytes))
