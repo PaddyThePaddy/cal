@@ -30,17 +30,25 @@ impl Candidate for Completion {
   }
 }
 
+impl<T> std::convert::From<T> for Completion
+where
+  T: std::convert::Into<String>,
+{
+  fn from(s: T) -> Completion {
+    Completion { str: s.into() }
+  }
+}
 struct Helper {
   completions: Vec<String>,
 }
 
 impl Helper {
-  fn new() -> Helper {
+  fn new<T>(candidates: Vec<T>) -> Helper
+  where
+    T: std::convert::Into<String>,
+  {
     Helper {
-      completions: custom_fn::get_custom_fn()
-        .into_iter()
-        .map(|(name, _)| name.to_owned())
-        .collect(),
+      completions: candidates.into_iter().map(|i| i.into()).collect(),
     }
   }
 }
@@ -100,8 +108,11 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     Editor::<Helper>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
   let mut memory: Vec<Value> = Vec::new();
   let mut echo = false;
+  let mut completions = vec!["_base", "_echo", "_memlen", "_memval", "exit", "BIT"];
 
-  rl.set_helper(Some(Helper::new()));
+  completions.extend(custom_fn::get_custom_fn().into_iter().map(|(n, _)| n));
+
+  rl.set_helper(Some(Helper::new(completions)));
 
   'control: loop {
     let mut input = match rl.readline("cal> ") {
