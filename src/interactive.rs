@@ -16,9 +16,16 @@ lazy_static! {
   static ref SEP_REGEX: Regex = Regex::new(r"\s").unwrap();
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Completion {
   str: String,
+  low: String,
+}
+
+impl Completion {
+  pub fn starts_with_lower(&self, other: &str) -> bool {
+    self.low.starts_with(other)
+  }
 }
 
 impl Candidate for Completion {
@@ -35,17 +42,22 @@ where
   T: std::convert::Into<String>,
 {
   fn from(s: T) -> Completion {
-    Completion { str: s.into() }
+    let s: String = s.into();
+    Completion {
+      low: s.to_lowercase(),
+      str: s,
+    }
   }
 }
+
 struct Helper {
-  completions: Vec<String>,
+  completions: Vec<Completion>,
 }
 
 impl Helper {
   fn new<T>(candidates: Vec<T>) -> Helper
   where
-    T: std::convert::Into<String>,
+    T: std::convert::Into<Completion>,
   {
     Helper {
       completions: candidates.into_iter().map(|i| i.into()).collect(),
@@ -75,8 +87,8 @@ impl Completer for Helper {
       self
         .completions
         .iter()
-        .filter(|c| c.to_lowercase().starts_with(&current_word))
-        .map(|s| Completion { str: s.clone() })
+        .filter(|c| c.starts_with_lower(&current_word))
+        .map(|c| c.clone())
         .collect(),
     ));
   }
