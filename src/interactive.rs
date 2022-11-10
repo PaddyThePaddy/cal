@@ -1,16 +1,105 @@
 use super::*;
 use regex::{Captures, Regex};
-use rustyline::{Config, Editor};
+use rustyline::Result as RustyResult;
+use rustyline::{
+  completion::{Candidate, Completer},
+  highlight::Highlighter,
+  hint::Hinter,
+  line_buffer::LineBuffer,
+  validate::Validator,
+  Config, Context, Editor,
+};
 
 lazy_static! {
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)_(?:base|b)\s*=?\(?\s*(\d+)\s*\)?").unwrap();
   static ref MEM_REGEX: Regex = Regex::new(r"\$(-)?(\d+)").unwrap();
+  static ref SEP_REGEX: Regex = Regex::new(r"\s").unwrap();
 }
 
+#[derive(Debug)]
+struct Completion {
+  str: String,
+}
+
+impl Candidate for Completion {
+  fn display(&self) -> &str {
+    return &self.str;
+  }
+  fn replacement(&self) -> &str {
+    return &self.str;
+  }
+}
+
+struct Helper {
+  completions: Vec<String>,
+}
+
+impl Helper {
+  fn new() -> Helper {
+    Helper {
+      completions: custom_fn::get_custom_fn()
+        .into_iter()
+        .map(|(name, _)| name.to_owned())
+        .collect(),
+    }
+  }
+}
+
+impl Completer for Helper {
+  type Candidate = Completion;
+
+  fn complete(
+    &self,
+    line: &str,
+    pos: usize,
+    _: &Context<'_>,
+  ) -> RustyResult<(usize, Vec<Self::Candidate>)> {
+    let start = (&line[..pos]).rfind(' ').unwrap_or(0);
+    let end = (&line[pos..]).find(' ').unwrap_or(line.len());
+    let current_word = &line[start..end];
+    if current_word.len() == 0 {
+      return Ok((start, Vec::new()));
+    }
+    return Ok((
+      start,
+      self
+        .completions
+        .iter()
+        .filter(|c| c.starts_with(current_word))
+        .map(|s| Completion { str: s.clone() })
+        .collect(),
+    ));
+  }
+
+  fn update(&self, line: &mut LineBuffer, start: usize, elected: &str) {
+    let word_start = start;
+    let remaining = &line[line.pos()..];
+    let word_end = line.pos()
+      + remaining
+        .chars()
+        .position(|c| c == ' ')
+        .unwrap_or(remaining.len());
+    line.replace(word_start..word_end, elected);
+  }
+}
+
+impl Hinter for Helper {
+  type Hint = String;
+}
+
+impl Highlighter for Helper {}
+
+impl Validator for Helper {}
+
+impl rustyline::Helper for Helper {}
+
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
-  let mut rl = Editor::<()>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
+  let mut rl =
+    Editor::<Helper>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
   let mut memory: Vec<Value> = Vec::new();
   let mut echo = false;
+
+  rl.set_helper(Some(Helper::new()));
 
   'control: loop {
     let mut input = match rl.readline("cal> ") {

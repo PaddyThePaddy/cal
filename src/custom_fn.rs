@@ -2,85 +2,43 @@ use std::num::TryFromIntError;
 
 use super::*;
 
+pub fn get_custom_fn() -> Vec<(&'static str, Function)> {
+  vec![
+    ("or8", Function::new(or8)),
+    ("and8", Function::new(and8)),
+    ("xor8", Function::new(xor8)),
+    ("not8", Function::new(not8)),
+    ("or16", Function::new(or16)),
+    ("and16", Function::new(and16)),
+    ("xor16", Function::new(xor16)),
+    ("not16", Function::new(not16)),
+    ("or32", Function::new(or32)),
+    ("and32", Function::new(and32)),
+    ("xor32", Function::new(xor32)),
+    ("not32", Function::new(not32)),
+    ("or64", Function::new(or64)),
+    ("and64", Function::new(and64)),
+    ("xor64", Function::new(xor64)),
+    ("not64", Function::new(not64)),
+    ("bits", Function::new(bits)),
+    ("bits_t", Function::new(bits_t)),
+    ("float", Function::new(float)),
+    ("ascii", Function::new(ascii)),
+    ("rev", Function::new(rev)),
+    ("com", Function::new(merge)),
+    ("combine", Function::new(merge)),
+    ("mer", Function::new(merge)),
+    ("merge", Function::new(merge)),
+    ("bytes", Function::new(bytes)),
+  ]
+}
+
 pub fn add_custom_function(context: &mut HashMapContext) {
-  context
-    .set_function("or8".into(), Function::new(or8))
-    .unwrap();
-  context
-    .set_function("and8".into(), Function::new(and8))
-    .unwrap();
-  context
-    .set_function("xor8".into(), Function::new(xor8))
-    .unwrap();
-  context
-    .set_function("not8".into(), Function::new(not8))
-    .unwrap();
-  context
-    .set_function("or16".into(), Function::new(or16))
-    .unwrap();
-  context
-    .set_function("and16".into(), Function::new(and16))
-    .unwrap();
-  context
-    .set_function("xor16".into(), Function::new(xor16))
-    .unwrap();
-  context
-    .set_function("not16".into(), Function::new(not16))
-    .unwrap();
-  context
-    .set_function("or32".into(), Function::new(or32))
-    .unwrap();
-  context
-    .set_function("and32".into(), Function::new(and32))
-    .unwrap();
-  context
-    .set_function("xor32".into(), Function::new(xor32))
-    .unwrap();
-  context
-    .set_function("not32".into(), Function::new(not32))
-    .unwrap();
-  context
-    .set_function("or64".into(), Function::new(or64))
-    .unwrap();
-  context
-    .set_function("and64".into(), Function::new(and64))
-    .unwrap();
-  context
-    .set_function("xor64".into(), Function::new(xor64))
-    .unwrap();
-  context
-    .set_function("not64".into(), Function::new(not64))
-    .unwrap();
-  context
-    .set_function("bits".into(), Function::new(bits))
-    .unwrap();
-  context
-    .set_function("bits_t".into(), Function::new(bits_t))
-    .unwrap();
-  context
-    .set_function("float".into(), Function::new(float))
-    .unwrap();
-  context
-    .set_function("ascii".into(), Function::new(ascii))
-    .unwrap();
-  context
-    .set_function("rev".into(), Function::new(rev))
-    .unwrap();
-  context
-    .set_function("com".into(), Function::new(merge))
-    .unwrap();
-  context
-    .set_function("combine".into(), Function::new(merge))
-    .unwrap();
-  context
-    .set_function("mer".into(), Function::new(merge))
-    .unwrap();
-  context
-    .set_function("merge".into(), Function::new(merge))
-    .unwrap();
-  context
-    .set_function("bytes".into(), Function::new(bytes))
-    .unwrap();
+  get_custom_fn().into_iter().for_each(|(n, f)| {
+    context
+      .set_function(n.to_owned(), f)
+      .expect("Set function failed");
+  });
 }
 
 fn to_u8(val: &Value) -> EvalexprResult<u8> {
