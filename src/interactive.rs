@@ -64,7 +64,7 @@ impl Completer for Helper {
   ) -> RustyResult<(usize, Vec<Self::Candidate>)> {
     let start = (&line[..pos]).rfind(' ').map(|n| n + 1).unwrap_or(0);
     let end = (&line[pos..]).find(' ').unwrap_or(line.len());
-    let current_word = &line[start..end];
+    let current_word = line[start..end].to_lowercase();
 
     if current_word.len() == 0 {
       return Ok((start, Vec::new()));
@@ -75,7 +75,7 @@ impl Completer for Helper {
       self
         .completions
         .iter()
-        .filter(|c| c.starts_with(current_word))
+        .filter(|c| c.to_lowercase().starts_with(&current_word))
         .map(|s| Completion { str: s.clone() })
         .collect(),
     ));
