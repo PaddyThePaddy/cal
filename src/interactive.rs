@@ -54,12 +54,14 @@ impl Completer for Helper {
     pos: usize,
     _: &Context<'_>,
   ) -> RustyResult<(usize, Vec<Self::Candidate>)> {
-    let start = (&line[..pos]).rfind(' ').unwrap_or(0);
+    let start = (&line[..pos]).rfind(' ').map(|n| n + 1).unwrap_or(0);
     let end = (&line[pos..]).find(' ').unwrap_or(line.len());
     let current_word = &line[start..end];
+
     if current_word.len() == 0 {
       return Ok((start, Vec::new()));
     }
+
     return Ok((
       start,
       self
