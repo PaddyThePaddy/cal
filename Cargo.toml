@@ -10,7 +10,7 @@ license = "MIT"
 codegen-units = 1
 
 [dependencies]
-evalexpr = {git = "https://github.com/PaddyThePaddy/evalexpr", rev="8606298ee8a9559d8e197db0d6fabbfb2dde6d65"}
+evalexpr = {git = "https://github.com/PaddyThePaddy/evalexpr", rev="66dbdd6a0e147f774c0d3d3af923ec3be0bb71ef"}
 clap = "4.0.18"
 git-version = "0.3.5"
 lazy_static = "1.4.0"
