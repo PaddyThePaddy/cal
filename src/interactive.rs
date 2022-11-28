@@ -12,6 +12,7 @@ use rustyline::{
 
 lazy_static! {
   static ref BASE_REGEX: Regex = Regex::new(r"(?i)_(?:base|b)\s*=?\(?\s*(\d+)\s*\)?").unwrap();
+  static ref FN_REGEX: Regex = Regex::new(r"(?i)_fn(?:\s+(\S+))?").unwrap();
   static ref MEM_REGEX: Regex = Regex::new(r"\$(-)?(\d+)").unwrap();
   static ref SEP_REGEX: Regex = Regex::new(r"\s").unwrap();
 }
@@ -31,6 +32,14 @@ impl Completion {
   }
   pub fn starts_with_lower(&self, other: &str) -> bool {
     self.triggers.iter().any(|s| s.starts_with(other))
+  }
+
+  pub fn target(&self) -> &str {
+    &self.str
+  }
+
+  pub fn triggers(&self) -> &Vec<String> {
+    &self.triggers
   }
 }
 
@@ -75,6 +84,10 @@ impl Helper {
     T: std::convert::Into<Completion>,
   {
     self.completions.push(candidates.into());
+  }
+
+  fn candidates(&self) -> &Vec<Completion> {
+    &self.completions
   }
 }
 
@@ -203,7 +216,7 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
     Editor::<Helper>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
   let mut memory: Vec<Value> = Vec::new();
   let mut echo = false;
-  let mut completions = vec!["_base", "_echo", "_memlen", "_memval", "exit", "BIT"];
+  let mut completions = vec!["_base", "_echo", "_memlen", "_memval", "_fn", "exit", "BIT"];
 
   completions.extend(custom_fn::get_custom_fn().into_iter().map(|(n, _)| n));
   let mut helper = Helper::new(completions);
@@ -254,6 +267,23 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
       base = new_base;
       println!("new base = {}\n", base);
       continue;
+    }
+
+    if let Some(cap) = FN_REGEX.captures(&input) {
+      let pattern = cap.get(1);
+      rl.helper()
+        .unwrap()
+        .candidates()
+        .iter()
+        .filter(|c| {
+          if let Some(p) = pattern {
+            c.target().find(p.as_str()).is_some()
+          } else {
+            true
+          }
+        })
+        .for_each(|c| println!("{}", c.target()));
+      continue 'control;
     }
 
     let mut break_flag = false;
