@@ -19,12 +19,18 @@ lazy_static! {
 #[derive(Debug, Clone)]
 struct Completion {
   str: String,
-  low: String,
+  triggers: Vec<String>,
 }
 
 impl Completion {
+  pub fn with_triggers<T: std::convert::Into<String>>(s: T, triggers: Vec<T>) -> Completion {
+    Completion {
+      str: s.into(),
+      triggers: triggers.into_iter().map(|tr| tr.into()).collect(),
+    }
+  }
   pub fn starts_with_lower(&self, other: &str) -> bool {
-    self.low.starts_with(other)
+    self.triggers.iter().any(|s| s.starts_with(other))
   }
 }
 
@@ -44,7 +50,7 @@ where
   fn from(s: T) -> Completion {
     let s: String = s.into();
     Completion {
-      low: s.to_lowercase(),
+      triggers: vec![s.to_lowercase()],
       str: s,
     }
   }
@@ -62,6 +68,13 @@ impl Helper {
     Helper {
       completions: candidates.into_iter().map(|i| i.into()).collect(),
     }
+  }
+
+  fn add<T>(&mut self, candidates: T)
+  where
+    T: std::convert::Into<Completion>,
+  {
+    self.completions.push(candidates.into());
   }
 }
 
@@ -115,6 +128,76 @@ impl Validator for Helper {}
 
 impl rustyline::Helper for Helper {}
 
+fn add_built_in_fn(helper: &mut Helper) {
+  [
+    ("min", vec!["min"]),
+    ("max", vec!["max"]),
+    ("len", vec!["len"]),
+    ("floor", vec!["floor"]),
+    ("round", vec!["round"]),
+    ("ceil", vec!["ceil"]),
+    ("if", vec!["if"]),
+    ("typeof", vec!["typeof"]),
+    ("math::is_nan", vec!["math::is_nan", "is_nan"]),
+    ("math::is_finite", vec!["math::is_finite", "is_finite"]),
+    (
+      "math::is_infinite",
+      vec!["math::is_infinite", "is_infinite"],
+    ),
+    ("math::is_normal", vec!["math::is_normal", "is_normal"]),
+    ("math::ln", vec!["math::ln", "ln"]),
+    ("math::log", vec!["math::log", "log"]),
+    ("math::log2", vec!["math::log2", "log2"]),
+    ("math::log10", vec!["math::log10", "log10"]),
+    ("math::exp", vec!["math::exp", "exp"]),
+    ("math::exp2", vec!["math::exp2", "exp2"]),
+    ("math::pow", vec!["math::pow", "pow"]),
+    ("math::cos", vec!["math::cos", "cos"]),
+    ("math::acos", vec!["math::acos", "acos"]),
+    ("math::cosh", vec!["math::cosh", "cosh"]),
+    ("math::acosh", vec!["math::acosh", "acosh"]),
+    ("math::sin", vec!["math::sin", "sin"]),
+    ("math::asin", vec!["math::asin", "asin"]),
+    ("math::sinh", vec!["math::sinh", "sinh"]),
+    ("math::asinh", vec!["math::asinh", "asinh"]),
+    ("math::tan", vec!["math::tan", "tan"]),
+    ("math::atan", vec!["math::atan", "atan"]),
+    ("math::atan2", vec!["math::atan2", "atan2"]),
+    ("math::tanh", vec!["math::tanh", "tanh"]),
+    ("math::atanh", vec!["math::atanh", "atanh"]),
+    ("math::sqrt", vec!["math::sqrt", "sqrt"]),
+    ("math::cbrt", vec!["math::cbrt", "cbrt"]),
+    ("math::hypot", vec!["math::hypot", "hypot"]),
+    (
+      "str::regex_matches",
+      vec!["str::regex_matches", "regex_matches"],
+    ),
+    (
+      "str::regex_replace",
+      vec!["str::regex_replace", "regex_replace"],
+    ),
+    (
+      "str::to_lowercase",
+      vec!["str::to_lowercase", "to_lowercase"],
+    ),
+    (
+      "str::to_uppercase",
+      vec!["str::to_uppercase", "to_uppercase"],
+    ),
+    ("str::trim", vec!["str::trim", "trim"]),
+    ("str::from", vec!["str::from", "from"]),
+    ("bitand", vec!["bitand"]),
+    ("bitor", vec!["bitor"]),
+    ("bitxor", vec!["bitxor"]),
+    ("bitnot", vec!["bitnot"]),
+    ("shl", vec!["shl"]),
+    ("shr", vec!["shr"]),
+    ("random", vec!["random"]),
+  ]
+  .into_iter()
+  .for_each(|(name, triggers)| helper.add(Completion::with_triggers(name, triggers)))
+}
+
 pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut rl =
     Editor::<Helper>::with_config(Config::builder().auto_add_history(true).build()).unwrap();
@@ -123,8 +206,9 @@ pub fn interactive(mut base: u32, context: &mut HashMapContext) {
   let mut completions = vec!["_base", "_echo", "_memlen", "_memval", "exit", "BIT"];
 
   completions.extend(custom_fn::get_custom_fn().into_iter().map(|(n, _)| n));
-
-  rl.set_helper(Some(Helper::new(completions)));
+  let mut helper = Helper::new(completions);
+  add_built_in_fn(&mut helper);
+  rl.set_helper(Some(helper));
 
   'control: loop {
     let mut input = match rl.readline("cal> ") {
