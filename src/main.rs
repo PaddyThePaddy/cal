@@ -1,5 +1,5 @@
 use anyhow::Context;
-use cal_lex::eval;
+use cal::eval;
 use clap::{command, Arg, ArgAction, ArgGroup, ArgMatches};
 
 fn get_args() -> ArgMatches {
