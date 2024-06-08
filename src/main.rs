@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
         println!(
             "{:b}",
             result.as_int().with_context(|| format!(
-                "--hex flag requires the result of the expression to be integer. Got {}",
+                "--bin flag requires the result of the expression to be integer. Got {}",
                 &result
             ))?
         );
@@ -56,14 +56,14 @@ fn main() -> anyhow::Result<()> {
         println!(
             "{:o}",
             result.as_int().with_context(|| format!(
-                "--hex flag requires the result of the expression to be integer. Got {}",
+                "--oct flag requires the result of the expression to be integer. Got {}",
                 &result
             ))?
         );
     } else if args.get_flag("bits") {
         let result = result.as_int().with_context(|| {
             format!(
-                "--hex flag requires the result of the expression to be integer. Got {}",
+                "--bits flag requires the result of the expression to be integer. Got {}",
                 &result
             )
         })?;
