@@ -3,7 +3,7 @@ use std::{collections::HashMap, fmt::Display};
 use operand::{Operand, OperandType};
 use operator::{default_handlers, Operator, OperatorAction};
 
-use crate::{lex::LexToken, Float, Integer};
+use crate::lex::LexToken;
 
 pub mod operand;
 pub mod operator;
@@ -79,46 +79,37 @@ impl<'a> From<&'a [LexToken]> for LexTokenIter<'a> {
 #[derive(Debug, Default, PartialEq, Eq)]
 enum ParseState {
     #[default]
-    ExpectOperand,
-    ExpectOperator,
-    ExpectNumber,
+    Operand,
+    Operator,
 }
 
 pub fn parse_expr(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
     let mut parse_state = ParseState::default();
     let mut ret_list = vec![];
-    let mut number_base = 1;
 
     while let Some(token) = tokens.next() {
         match parse_state {
-            ParseState::ExpectOperator => {
+            ParseState::Operator => {
                 if let LexToken::CloseParenthesis = token {
                     return Ok(ret_list);
                 }
                 ret_list.push(ExprToken::Operator(token.try_into()?));
-                parse_state = ParseState::ExpectOperand;
+                parse_state = ParseState::Operand;
             }
-            ParseState::ExpectOperand => match token {
+            ParseState::Operand => match token {
                 LexToken::Float(float) => {
-                    ret_list.push(ExprToken::Operand(Operand::Float(
-                        float * number_base as Float,
-                    )));
-                    number_base = 1;
-                    parse_state = ParseState::ExpectOperator;
+                    ret_list.push(ExprToken::Operand(Operand::Float(float)));
+                    parse_state = ParseState::Operator;
                 }
                 LexToken::Integer(int) => {
-                    ret_list.push(ExprToken::Operand(Operand::Integer(
-                        int * number_base as Integer,
-                    )));
-                    number_base = 1;
-                    parse_state = ParseState::ExpectOperator;
+                    ret_list.push(ExprToken::Operand(Operand::Integer(int)));
+                    parse_state = ParseState::Operator;
                 }
                 LexToken::Minus => {
-                    number_base *= -1;
-                    parse_state = ParseState::ExpectNumber;
+                    ret_list.push(ExprToken::Operator(Operator::Negate));
                 }
                 LexToken::Plus => {
-                    parse_state = ParseState::ExpectNumber;
+                    ret_list.push(ExprToken::Operator(Operator::Postive));
                 }
                 LexToken::BitNot(width) => {
                     ret_list.push(ExprToken::Operator(Operator::BitNot(width)));
@@ -127,39 +118,22 @@ pub fn parse_expr(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
                     ret_list.push(ExprToken::Operator(Operator::OpenParenthesis));
                     ret_list.extend(parse_expr(tokens)?);
                     ret_list.push(ExprToken::Operator(Operator::CloseParenthesis));
-                    parse_state = ParseState::ExpectOperator;
+                    parse_state = ParseState::Operator;
                 }
                 LexToken::Custom(id) => {
                     ret_list.push(ExprToken::Operator(Operator::Custom(id.clone())));
                     ret_list.extend(parse_para(tokens)?);
-                    parse_state = ParseState::ExpectOperator;
+                    parse_state = ParseState::Operator;
                 }
                 LexToken::String(s) => {
                     ret_list.push(ExprToken::Operand(Operand::String(s)));
-                    parse_state = ParseState::ExpectOperator;
-                }
-                _ => Err(Error::ExpectOperand(token.clone()))?,
-            },
-            ParseState::ExpectNumber => match token {
-                LexToken::Float(float) => {
-                    ret_list.push(ExprToken::Operand(Operand::Float(
-                        float * number_base as Float,
-                    )));
-                    number_base = 1;
-                    parse_state = ParseState::ExpectOperator;
-                }
-                LexToken::Integer(int) => {
-                    ret_list.push(ExprToken::Operand(Operand::Integer(
-                        int * number_base as Integer,
-                    )));
-                    number_base = 1;
-                    parse_state = ParseState::ExpectOperator;
+                    parse_state = ParseState::Operator;
                 }
                 _ => Err(Error::ExpectOperand(token.clone()))?,
             },
         }
     }
-    if parse_state != ParseState::ExpectOperator {
+    if parse_state != ParseState::Operator {
         dbg!(parse_state);
         Err(Error::UnexpectedEnd)?;
     }
@@ -194,7 +168,8 @@ pub fn parse_para(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
         }
     }
     para_list
-        .split(|tk| *tk == LexToken::Comma).try_for_each(|para_tk| {
+        .split(|tk| *tk == LexToken::Comma)
+        .try_for_each(|para_tk| {
             ret_list.extend(parse_expr(&mut para_tk.into())?);
             Ok(())
         })?;

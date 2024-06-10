@@ -24,6 +24,8 @@ pub enum Operator {
     Custom(String),
     RightShift,
     LeftShift,
+    Negate,
+    Postive,
 }
 
 impl TryFrom<LexToken> for Operator {
@@ -50,11 +52,11 @@ impl TryFrom<LexToken> for Operator {
 }
 
 impl Operator {
-    // lower number is hight precedence
+    /// lower number is hight precedence
+    /// unary operators should have a precedence 0
     pub fn precedence(&self) -> usize {
         match self {
-            Self::Custom(_) => 0,
-            Self::BitNot(_) => 0,
+            Self::Custom(_) | Self::BitNot(_) | Self::Negate | Self::Postive => 0,
             Self::Expo => 2,
             Self::Mul | Self::Div | Self::Mod => 3,
             Self::Add | Self::Minus => 4,
@@ -85,6 +87,8 @@ impl Display for Operator {
             Operator::Custom(id) => write!(f, "{id}"),
             Operator::RightShift => write!(f, ">>"),
             Operator::LeftShift => write!(f, "<<"),
+            Operator::Negate => write!(f, "-"),
+            Operator::Postive => write!(f, "+"),
         }
     }
 }
@@ -114,7 +118,26 @@ pub fn default_handlers() -> Vec<(Operator, OperatorAction)> {
         (Operator::BitXor(128), Box::new(op_bit_xor_128)),
         (Operator::Custom("ascii".to_string()), Box::new(ascii)),
         (Operator::Custom("rev".to_string()), Box::new(rev)),
+        (Operator::Negate, Box::new(neg)),
+        (Operator::Postive, Box::new(noop)),
     ]
+}
+
+fn noop(_operands: &mut Vec<Operand>) -> Result<(), Error> {
+    Ok(())
+}
+
+fn neg(operands: &mut Vec<Operand>) -> Result<(), Error> {
+    let token = operands.pop().ok_or(Error::NotEnoughOperand)?;
+    match token {
+        Operand::Float(f) => operands.push(Operand::Float(f * -1.0)),
+        Operand::Integer(i) => operands.push(Operand::Integer(-i)),
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::Integer, OperandType::Float],
+            got: token.data_type(),
+        })?,
+    }
+    Ok(())
 }
 
 fn op_add(operands: &mut Vec<Operand>) -> Result<(), Error> {
