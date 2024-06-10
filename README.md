@@ -1,3 +1,4 @@
+[![Rust](https://github.com/PaddyThePaddy/cal/actions/workflows/rust.yml/badge.svg)](https://github.com/PaddyThePaddy/cal/actions/workflows/rust.yml)  
 A cli caculator for myself (mostly firmware programming scenario)
 
 # Example
