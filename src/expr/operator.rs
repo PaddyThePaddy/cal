@@ -123,6 +123,7 @@ pub fn default_handlers() -> Vec<(Operator, OperatorAction)> {
     ]
 }
 
+#[allow(clippy::ptr_arg)]
 fn noop(_operands: &mut Vec<Operand>) -> Result<(), Error> {
     Ok(())
 }
