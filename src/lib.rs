@@ -1,4 +1,6 @@
-use expr::{operand::Operand, parse_expr, print_tokens, to_suffix, Evaluator};
+#[cfg(debug_assertions)]
+use expr::print_tokens;
+use expr::{operand::Operand, parse_expr, to_suffix, Evaluator};
 use lex::LexToken;
 use logos::Logos;
 
