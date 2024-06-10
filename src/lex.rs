@@ -102,9 +102,12 @@ fn dec_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
     } else if let Some(remain) = token.strip_suffix(['g', 'G']) {
         token = remain;
         1024 * 1024 * 1024
-    } else if let Some(remain) = token.strip_suffix(['p', 'P']) {
+    } else if let Some(remain) = token.strip_suffix(['t', 'T']) {
         token = remain;
         1024 * 1024 * 1024 * 1024
+    } else if let Some(remain) = token.strip_suffix(['p', 'P']) {
+        token = remain;
+        1024 * 1024 * 1024 * 1024 * 1024
     } else {
         1
     };
