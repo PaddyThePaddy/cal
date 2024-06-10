@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::BitXor};
+use std::{fmt::Display};
 
 use crate::{Float, Integer};
 

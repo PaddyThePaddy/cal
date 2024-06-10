@@ -194,12 +194,10 @@ pub fn parse_para(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
         }
     }
     para_list
-        .split(|tk| *tk == LexToken::Comma)
-        .map(|para_tk| {
+        .split(|tk| *tk == LexToken::Comma).try_for_each(|para_tk| {
             ret_list.extend(parse_expr(&mut para_tk.into())?);
             Ok(())
-        })
-        .collect::<Result<(), Error>>()?;
+        })?;
 
     Ok(ret_list)
 }
@@ -283,5 +281,5 @@ pub fn print_tokens(tokens: &[ExprToken]) {
     for tk in tokens {
         print!("{tk} ");
     }
-    println!("");
+    println!();
 }
