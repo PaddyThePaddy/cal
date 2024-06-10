@@ -46,7 +46,7 @@ impl TryFrom<LexToken> for Operator {
             LexToken::OpenParenthesis => Ok(Operator::OpenParenthesis),
             LexToken::Plus => Ok(Operator::Add),
             LexToken::RightShift => Ok(Operator::RightShift),
-            _ => todo!(),
+            _ => Err(Error::ExpectOperator(value)),
         }
     }
 }

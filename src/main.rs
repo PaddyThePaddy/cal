@@ -40,31 +40,27 @@ fn main() -> anyhow::Result<()> {
         println!(
             "{:X}",
             result.as_int().with_context(|| format!(
-                "--hex flag requires the result of the expression to be integer. Got {}",
-                &result
+                "--hex flag requires the result of the expression to be integer. Got {result:?}",
             ))?
         );
     } else if args.get_flag("bin") {
         println!(
             "{:b}",
             result.as_int().with_context(|| format!(
-                "--bin flag requires the result of the expression to be integer. Got {}",
-                &result
+                "--bin flag requires the result of the expression to be integer. Got {result:?}",
             ))?
         );
     } else if args.get_flag("oct") {
         println!(
             "{:o}",
             result.as_int().with_context(|| format!(
-                "--oct flag requires the result of the expression to be integer. Got {}",
-                &result
+                "--oct flag requires the result of the expression to be integer. Got {result:?}",
             ))?
         );
     } else if args.get_flag("bits") {
         let result = result.as_int().with_context(|| {
             format!(
-                "--bits flag requires the result of the expression to be integer. Got {}",
-                &result
+                "--bits flag requires the result of the expression to be integer. Got {result:?}"
             )
         })?;
         let mut list = vec![];
