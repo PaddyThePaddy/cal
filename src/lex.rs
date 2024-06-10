@@ -20,23 +20,23 @@ pub enum Error {
     Invalid,
 }
 
-#[derive(Logos, Debug, PartialEq)]
+#[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f]+")]
 #[logos(error=Error)]
 pub enum LexToken {
-    #[regex(r"(?i)[-+]?\d+[kmgtp]?", dec_number, priority = 3)]
-    #[regex(r"[-+]?0x[\da-fA-F]+", hex_number)]
-    #[regex(r"[-+]?0o[0-7]+", oct_number)]
-    #[regex(r"[-+]?0b[01]+", bin_number)]
+    #[regex(r"(?i)\d+[kmgtp]?", dec_number, priority = 3)]
+    #[regex(r"0x[\da-fA-F]+", hex_number)]
+    #[regex(r"0o[0-7]+", oct_number)]
+    #[regex(r"0b[01]+", bin_number)]
     Integer(Integer),
     #[regex(
-        r"[-+]?(?:[1-9]\d*|\.\d+|\d+\.\d+)(?:[eE][-+]?(?:\d+|\.\d+|\d+\.\d+))?",
+        r"(?:[1-9]\d*|\.\d+|\d+\.\d+)(?:[eE][-+]?(?:\d+|\.\d+|\d+\.\d+))?",
         science_notation,
         priority = 2
     )]
     Float(Float),
     #[token("+")]
-    Add,
+    Plus,
     #[token("-")]
     Minus,
     #[token("*")]
@@ -60,12 +60,14 @@ pub enum LexToken {
     Expo,
     #[token("%")]
     Mod,
-    //#[regex("[a-zA-Z]\\w*", store_identifier)]
-    //Custom(String),
+    #[regex("[a-zA-Z]\\w*", store_identifier)]
+    Custom(String),
     #[token(">>")]
     RightShift,
     #[token("<<")]
     LeftShift,
+    #[token(",")]
+    Comma,
 }
 
 impl LexToken {
@@ -80,7 +82,7 @@ impl LexToken {
             | Self::BitXor(_)
             | Self::LeftShift
             | Self::RightShift => Some(1),
-            Self::Add | Self::Minus | Self::BitOr => Some(2),
+            Self::Plus | Self::Minus | Self::BitOr => Some(2),
             _ => None,
         }
     }
@@ -88,15 +90,6 @@ impl LexToken {
 
 fn dec_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
     let mut token = lex.slice();
-    let mut sign: Integer = 1;
-    if let Some(remain) = token.strip_prefix('-') {
-        sign = -1;
-        token = remain;
-    }
-    if let Some(remain) = token.strip_prefix('+') {
-        sign = 1;
-        token = remain;
-    }
     let unit = if let Some(remain) = token.strip_suffix(['k', 'K']) {
         token = remain;
         1024
@@ -113,83 +106,48 @@ fn dec_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
         1
     };
     Integer::from_str_radix(token, 10)
-        .map(|n| n * sign * unit)
+        .map(|n| n * unit)
         .map_err(Error::from)
 }
 
 fn hex_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
-    let mut token = lex.slice();
-    let mut sign: Integer = 1;
-    if let Some(remain) = token.strip_prefix('-') {
-        sign = -1;
-        token = remain;
-    }
-    if let Some(remain) = token.strip_prefix('+') {
-        sign = 1;
-        token = remain;
-    }
-    token
+    lex.slice()
         .strip_prefix("0x")
         .ok_or(Error::Invalid)
         .and_then(|s| Integer::from_str_radix(s, 16).map_err(Error::from))
-        .map(|n| n * sign)
 }
 
 fn oct_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
-    let mut token = lex.slice();
-    let mut sign: Integer = 1;
-    if let Some(remain) = token.strip_prefix('-') {
-        sign = -1;
-        token = remain;
-    }
-    if let Some(remain) = token.strip_prefix('+') {
-        sign = 1;
-        token = remain;
-    }
-    token
+    lex.slice()
         .strip_prefix("0o")
         .ok_or(Error::Invalid)
         .and_then(|s| Integer::from_str_radix(s, 8).map_err(Error::from))
-        .map(|n| n * sign)
 }
 
 fn bin_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
-    let mut token = lex.slice();
-    let mut sign: Integer = 1;
-    if let Some(remain) = token.strip_prefix('-') {
-        sign = -1;
-        token = remain;
-    }
-    if let Some(remain) = token.strip_prefix('+') {
-        sign = 1;
-        token = remain;
-    }
-    token
+    lex.slice()
         .strip_prefix("0b")
         .ok_or(Error::Invalid)
         .and_then(|s| Integer::from_str_radix(s, 2).map_err(Error::from))
-        .map(|n| n * sign)
 }
 
-//fn store_identifier(lex: &mut Lexer<LexToken>) -> Option<String> {
-//    Some(lex.slice().to_string())
-//}
+fn store_identifier(lex: &mut Lexer<LexToken>) -> Option<String> {
+    Some(lex.slice().to_string())
+}
 
 fn bit_width(lex: &mut Lexer<LexToken>) -> Result<usize, Error> {
     lex.slice()
         .strip_suffix(['^', '~', '!'])
         .ok_or(Error::Invalid)
-        .and_then(|s| 
-            match s{
-                "b" => Ok(8),
-                "w" => Ok(16),
-                "dw" => Ok(32),
-                "l" => Ok(64),
-                "ll" => Ok(128),
-                "" => Ok(32),
-                _ => Err(Error::InvalidBitWidthHint(s.to_string()))
-            }
-        )
+        .and_then(|s| match s {
+            "b" => Ok(8),
+            "w" => Ok(16),
+            "dw" => Ok(32),
+            "l" => Ok(64),
+            "ll" => Ok(128),
+            "" => Ok(32),
+            _ => Err(Error::InvalidBitWidthHint(s.to_string())),
+        })
 }
 
 fn science_notation(lex: &mut Lexer<LexToken>) -> Result<Float, Error> {

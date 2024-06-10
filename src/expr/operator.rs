@@ -1,6 +1,6 @@
 use std::{fmt::Display, ops::BitXor};
 
-use crate::Integer;
+use crate::{lex::LexToken, Integer};
 
 use super::{operand::Operand, Error};
 
@@ -21,6 +21,29 @@ pub enum Operator {
     Custom(String),
     RightShift,
     LeftShift,
+}
+
+impl TryFrom<LexToken> for Operator {
+    type Error = Error;
+    fn try_from(value: LexToken) -> Result<Self, Self::Error> {
+        match value {
+            LexToken::BitAnd => Ok(Operator::BitAnd),
+            LexToken::BitNot(w) => Ok(Operator::BitNot(w)),
+            LexToken::BitOr => Ok(Operator::BitOr),
+            LexToken::BitXor(w) => Ok(Operator::BitXor(w)),
+            LexToken::CloseParenthesis => Ok(Operator::CloseParenthesis),
+            LexToken::Div => Ok(Operator::Div),
+            LexToken::Expo => Ok(Operator::Expo),
+            LexToken::LeftShift => Ok(Operator::LeftShift),
+            LexToken::Minus => Ok(Operator::Minus),
+            LexToken::Mod => Ok(Operator::Mod),
+            LexToken::Mul => Ok(Operator::Mul),
+            LexToken::OpenParenthesis => Ok(Operator::OpenParenthesis),
+            LexToken::Plus => Ok(Operator::Add),
+            LexToken::RightShift => Ok(Operator::RightShift),
+            _ => todo!(),
+        }
+    }
 }
 
 impl Operator {

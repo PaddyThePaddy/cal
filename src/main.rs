@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
         .map(String::as_str)
         .collect::<Vec<_>>()
         .join(" ");
-    let result = eval(&expr)?;
+    let result = eval(&expr, None)?;
     if args.get_flag("hex") {
         println!(
             "{:X}",
