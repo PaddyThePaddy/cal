@@ -10,6 +10,9 @@ Outputs FFFFFF0F
 `cal "0b101 b^ b!0" -b`  
 Outputs 11111010  
 
+`cal "ascii(0x5f465648)"`  
+Outputs _FVH  
+
 # Input format
 Number literals in the expression accepts following format:
 - Decimal numbers
