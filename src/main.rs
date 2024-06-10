@@ -3,7 +3,12 @@ use cal::eval;
 use clap::{command, Arg, ArgAction, ArgGroup, ArgMatches};
 
 fn get_args() -> ArgMatches {
-    command!()
+    command!().version(
+        git_version::git_version!(
+                prefix="git:",
+                cargo_prefix="cargo",
+                fallback="wtf"
+        ))
         .args([
             Arg::new("expr").action(ArgAction::Append).required(true),
             Arg::new("hex")

@@ -11,5 +11,6 @@ codegen-units = 1
 [dependencies]
 anyhow = "1.0.86"
 clap = { version = "4.5.6", features = ["cargo"] }
+git-version = "0.3.9"
 logos = "0.14.0"
 thiserror = "1.0.61"
