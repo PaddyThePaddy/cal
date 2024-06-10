@@ -68,6 +68,9 @@ pub enum LexToken {
     LeftShift,
     #[token(",")]
     Comma,
+    #[regex(r#""([^"]|\\")*""#, store_string)]
+    #[regex(r#"'([^']|\\')*'"#, store_string)]
+    String(String),
 }
 
 impl LexToken {
@@ -152,4 +155,14 @@ fn bit_width(lex: &mut Lexer<LexToken>) -> Result<usize, Error> {
 
 fn science_notation(lex: &mut Lexer<LexToken>) -> Result<Float, Error> {
     Float::from_str(lex.slice()).map_err(Error::from)
+}
+
+fn store_string(lex: &mut Lexer<LexToken>) -> Result<String, Error> {
+    Ok(lex
+        .slice()
+        .strip_prefix(['\'', '"'])
+        .ok_or(Error::Invalid)?
+        .strip_suffix(['\'', '"'])
+        .ok_or(Error::Invalid)?
+        .to_string())
 }

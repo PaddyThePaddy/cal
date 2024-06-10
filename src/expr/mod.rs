@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Display};
 
-use operand::Operand;
+use operand::{Operand, OperandType};
 use operator::{default_handlers, Operator, OperatorAction};
 
 use crate::{lex::LexToken, Float, Integer};
@@ -16,8 +16,11 @@ pub enum Error {
     NoMatchingHandler { op: Operator },
     #[error("Redundant operand: {0}")]
     RedundantOperand(usize),
-    #[error("Invalid data type: {0}")]
-    InvalidDataType(String),
+    #[error("Invalid data type: expected {expected:?}, got {got}")]
+    InvalidDataType {
+        expected: Vec<OperandType>,
+        got: OperandType,
+    },
     #[error("{0}")]
     Custom(String),
     #[error("Expect operator, got {0:?}")]
@@ -131,6 +134,10 @@ pub fn parse_expr(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
                     ret_list.extend(parse_para(tokens)?);
                     parse_state = ParseState::ExpectOperator;
                 }
+                LexToken::String(s) => {
+                    ret_list.push(ExprToken::Operand(Operand::String(s)));
+                    parse_state = ParseState::ExpectOperator;
+                }
                 _ => Err(Error::ExpectOperand(token.clone()))?,
             },
             ParseState::ExpectNumber => match token {
@@ -217,7 +224,7 @@ pub fn to_suffix(src: &[ExprToken]) -> Vec<ExprToken> {
                     op_stack.push(op.clone());
                 } else {
                     while let Some(top) = op_stack.last() {
-                        if top.precedence() > op.precedence() {
+                        if top.precedence() > op.precedence() || op.precedence() == 0 {
                             break;
                         }
                         list.push(ExprToken::Operator(op_stack.pop().unwrap()));

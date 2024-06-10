@@ -1,4 +1,4 @@
-use expr::{operand::Operand, parse_expr, to_suffix, Evaluator};
+use expr::{operand::Operand, parse_expr, print_tokens, to_suffix, Evaluator};
 use lex::LexToken;
 use logos::Logos;
 
@@ -19,7 +19,11 @@ pub fn tokenize(formula: &str) -> Result<Vec<LexToken>, lex::Error> {
 pub fn eval(formula: &str, evaluator: Option<&Evaluator>) -> Result<Operand, anyhow::Error> {
     let lex = tokenize(formula)?;
     let expr_tokens = parse_expr(&mut lex.as_slice().into())?;
+    #[cfg(debug_assertions)]
+    print_tokens(&expr_tokens);
     let suffix = to_suffix(&expr_tokens);
+    #[cfg(debug_assertions)]
+    print_tokens(&suffix);
     let default_eval = Evaluator::default();
     let calculator = evaluator.unwrap_or(&default_eval);
     Ok(calculator.eval(&suffix)?)
@@ -32,21 +36,9 @@ mod test {
     use super::*;
 
     fn test_func(operands: &mut Vec<Operand>) -> Result<(), Error> {
-        let c = operands
-            .pop()
-            .ok_or(Error::NotEnoughOperand)?
-            .as_int()
-            .ok_or(Error::InvalidDataType("Float".to_string()))?;
-        let b = operands
-            .pop()
-            .ok_or(Error::NotEnoughOperand)?
-            .as_int()
-            .ok_or(Error::InvalidDataType("Float".to_string()))?;
-        let a = operands
-            .pop()
-            .ok_or(Error::NotEnoughOperand)?
-            .as_int()
-            .ok_or(Error::InvalidDataType("Float".to_string()))?;
+        let c = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+        let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+        let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
 
         operands.push(Operand::Integer(a * b + c));
 
@@ -87,5 +79,9 @@ mod test {
             eval("(2--1)*5+-3+func(((2)),(1+2),4)", Some(&evaluator)).unwrap(),
             Operand::Integer(22)
         );
+        assert_eq!(
+            eval(r"1+rev(ascii('_FVH'))+2", None).unwrap(),
+            Operand::Integer(0x48564662)
+        )
     }
 }

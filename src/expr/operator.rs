@@ -2,7 +2,10 @@ use std::{fmt::Display, ops::BitXor};
 
 use crate::{lex::LexToken, Integer};
 
-use super::{operand::Operand, Error};
+use super::{
+    operand::{Operand, OperandType},
+    Error,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Operator {
@@ -109,27 +112,29 @@ pub fn default_handlers() -> Vec<(Operator, OperatorAction)> {
         (Operator::BitXor(32), Box::new(op_bit_xor_32)),
         (Operator::BitXor(64), Box::new(op_bit_xor_64)),
         (Operator::BitXor(128), Box::new(op_bit_xor_128)),
+        (Operator::Custom("ascii".to_string()), Box::new(ascii)),
+        (Operator::Custom("rev".to_string()), Box::new(rev)),
     ]
 }
 
 fn op_add(operands: &mut Vec<Operand>) -> Result<(), Error> {
     let b = operands.pop().ok_or(Error::NotEnoughOperand)?;
     let a = operands.pop().ok_or(Error::NotEnoughOperand)?;
-    let (a, b) = Operand::upgrade_if_need(a, b);
+    let (a, b) = Operand::upgrade_if_need(a, b)?;
 
     let result = match a {
         Operand::Integer(a) => {
-            let b = b
-                .as_int()
-                .ok_or(Error::InvalidDataType("Float".to_string()))?;
+            let b = b.as_int()?;
             Operand::Integer(a + b)
         }
         Operand::Float(a) => {
-            let b = b
-                .as_float()
-                .ok_or(Error::InvalidDataType("Integer".to_string()))?;
+            let b = b.as_float()?;
             Operand::Float(a + b)
         }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::Integer, OperandType::Float],
+            got: a.data_type(),
+        })?,
     };
     operands.push(result);
 
@@ -139,21 +144,21 @@ fn op_add(operands: &mut Vec<Operand>) -> Result<(), Error> {
 fn op_minus(operands: &mut Vec<Operand>) -> Result<(), Error> {
     let b = operands.pop().ok_or(Error::NotEnoughOperand)?;
     let a = operands.pop().ok_or(Error::NotEnoughOperand)?;
-    let (a, b) = Operand::upgrade_if_need(a, b);
+    let (a, b) = Operand::upgrade_if_need(a, b)?;
 
     let result = match a {
         Operand::Integer(a) => {
-            let b = b
-                .as_int()
-                .ok_or(Error::InvalidDataType("Float".to_string()))?;
+            let b = b.as_int()?;
             Operand::Integer(a - b)
         }
         Operand::Float(a) => {
-            let b = b
-                .as_float()
-                .ok_or(Error::InvalidDataType("Integer".to_string()))?;
+            let b = b.as_float()?;
             Operand::Float(a - b)
         }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::Integer, OperandType::Float],
+            got: a.data_type(),
+        })?,
     };
     operands.push(result);
 
@@ -163,21 +168,21 @@ fn op_minus(operands: &mut Vec<Operand>) -> Result<(), Error> {
 fn op_mul(operands: &mut Vec<Operand>) -> Result<(), Error> {
     let b = operands.pop().ok_or(Error::NotEnoughOperand)?;
     let a = operands.pop().ok_or(Error::NotEnoughOperand)?;
-    let (a, b) = Operand::upgrade_if_need(a, b);
+    let (a, b) = Operand::upgrade_if_need(a, b)?;
 
     let result = match a {
         Operand::Integer(a) => {
-            let b = b
-                .as_int()
-                .ok_or(Error::InvalidDataType("Float".to_string()))?;
+            let b = b.as_int()?;
             Operand::Integer(a * b)
         }
         Operand::Float(a) => {
-            let b = b
-                .as_float()
-                .ok_or(Error::InvalidDataType("Integer".to_string()))?;
+            let b = b.as_float()?;
             Operand::Float(a * b)
         }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::Integer, OperandType::Float],
+            got: a.data_type(),
+        })?,
     };
     operands.push(result);
 
@@ -187,21 +192,21 @@ fn op_mul(operands: &mut Vec<Operand>) -> Result<(), Error> {
 fn op_div(operands: &mut Vec<Operand>) -> Result<(), Error> {
     let b = operands.pop().ok_or(Error::NotEnoughOperand)?;
     let a = operands.pop().ok_or(Error::NotEnoughOperand)?;
-    let (a, b) = Operand::upgrade_if_need(a, b);
+    let (a, b) = Operand::upgrade_if_need(a, b)?;
 
     let result = match a {
         Operand::Integer(a) => {
-            let b = b
-                .as_int()
-                .ok_or(Error::InvalidDataType("Float".to_string()))?;
+            let b = b.as_int()?;
             Operand::Integer(a / b)
         }
         Operand::Float(a) => {
-            let b = b
-                .as_float()
-                .ok_or(Error::InvalidDataType("Integer".to_string()))?;
+            let b = b.as_float()?;
             Operand::Float(a / b)
         }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::Integer, OperandType::Float],
+            got: a.data_type(),
+        })?,
     };
     operands.push(result);
 
@@ -211,13 +216,11 @@ fn op_div(operands: &mut Vec<Operand>) -> Result<(), Error> {
 fn op_exp(operands: &mut Vec<Operand>) -> Result<(), Error> {
     let b = operands.pop().ok_or(Error::NotEnoughOperand)?;
     let a = operands.pop().ok_or(Error::NotEnoughOperand)?;
-    let (a, b) = Operand::upgrade_if_need(a, b);
+    let (a, b) = Operand::upgrade_if_need(a, b)?;
 
     let result = match a {
         Operand::Integer(a) => {
-            let b = b
-                .as_int()
-                .ok_or(Error::InvalidDataType("Float".to_string()))?;
+            let b = b.as_int()?;
             if b < u32::MIN as Integer || b > u32::MAX as Integer {
                 Err(Error::Custom(
                     "Exp operation for integers only allows u32 as parameter".to_string(),
@@ -226,11 +229,13 @@ fn op_exp(operands: &mut Vec<Operand>) -> Result<(), Error> {
             Operand::Integer(a.pow(b as u32))
         }
         Operand::Float(a) => {
-            let b = b
-                .as_float()
-                .ok_or(Error::InvalidDataType("Integer".to_string()))?;
+            let b = b.as_float()?;
             Operand::Float(a.powf(b))
         }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::Integer, OperandType::Float],
+            got: a.data_type(),
+        })?,
     };
     operands.push(result);
 
@@ -238,16 +243,8 @@ fn op_exp(operands: &mut Vec<Operand>) -> Result<(), Error> {
 }
 
 fn op_bit_or(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
 
     operands.push(Operand::Integer(a | b));
 
@@ -255,16 +252,8 @@ fn op_bit_or(operands: &mut Vec<Operand>) -> Result<(), Error> {
 }
 
 fn op_bit_and(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
 
     operands.push(Operand::Integer(a & b));
 
@@ -272,16 +261,8 @@ fn op_bit_and(operands: &mut Vec<Operand>) -> Result<(), Error> {
 }
 
 fn op_bit_sh_right(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
 
     operands.push(Operand::Integer(a >> b));
 
@@ -289,16 +270,8 @@ fn op_bit_sh_right(operands: &mut Vec<Operand>) -> Result<(), Error> {
 }
 
 fn op_bit_sh_left(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
 
     operands.push(Operand::Integer(a << b));
 
@@ -306,16 +279,8 @@ fn op_bit_sh_left(operands: &mut Vec<Operand>) -> Result<(), Error> {
 }
 
 fn op_mod(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))?;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()?;
 
     operands.push(Operand::Integer(a % b));
 
@@ -323,125 +288,121 @@ fn op_mod(operands: &mut Vec<Operand>) -> Result<(), Error> {
 }
 
 fn op_bit_not_8(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u8;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u8;
     operands.push(Operand::Integer((!a) as Integer));
 
     Ok(())
 }
 
 fn op_bit_not_16(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u16;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u16;
     operands.push(Operand::Integer((!a) as Integer));
 
     Ok(())
 }
 
 fn op_bit_not_32(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u32;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u32;
     operands.push(Operand::Integer((!a) as Integer));
 
     Ok(())
 }
 
 fn op_bit_not_64(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u64;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u64;
     operands.push(Operand::Integer((!a) as Integer));
 
     Ok(())
 }
 
 fn op_bit_xor_8(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u8;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u8;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u8;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u8;
     operands.push(Operand::Integer((a.bitxor(b)) as Integer));
 
     Ok(())
 }
 
 fn op_bit_xor_16(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u16;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u16;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u16;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u16;
     operands.push(Operand::Integer((a.bitxor(b)) as Integer));
 
     Ok(())
 }
 
 fn op_bit_xor_32(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u32;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u32;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u32;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u32;
     operands.push(Operand::Integer((a.bitxor(b)) as Integer));
 
     Ok(())
 }
 
 fn op_bit_xor_64(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u64;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u64;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u64;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u64;
     operands.push(Operand::Integer((a.bitxor(b)) as Integer));
 
     Ok(())
 }
 
 fn op_bit_xor_128(operands: &mut Vec<Operand>) -> Result<(), Error> {
-    let b = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u128;
-    let a = operands
-        .pop()
-        .ok_or(Error::NotEnoughOperand)?
-        .as_int()
-        .ok_or(Error::InvalidDataType("Float".to_string()))? as u128;
+    let b = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u128;
+    let a = operands.pop().ok_or(Error::NotEnoughOperand)?.as_int()? as u128;
     operands.push(Operand::Integer((a.bitxor(b)) as Integer));
+
+    Ok(())
+}
+
+fn ascii(operands: &mut Vec<Operand>) -> Result<(), Error> {
+    let operand = operands.pop().ok_or(Error::NotEnoughOperand)?;
+    match operand {
+        Operand::String(s) => {
+            let int = s
+                .chars()
+                .map(|c| c as u8)
+                .fold(0, |pre, b| (pre << 8) + b as Integer);
+            operands.push(Operand::Integer(int));
+        }
+        Operand::Integer(mut int) => {
+            let mut chars = vec![];
+            while int != 0 {
+                chars.push((int & 0xFF) as u8 as char);
+                int >>= 8;
+            }
+            chars.reverse();
+            operands.push(Operand::String(String::from_iter(chars)))
+        }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::String, OperandType::Integer],
+            got: operand.data_type(),
+        })?,
+    }
+    Ok(())
+}
+
+fn rev(operands: &mut Vec<Operand>) -> Result<(), Error> {
+    let operand = operands.pop().ok_or(Error::NotEnoughOperand)?;
+    match operand {
+        Operand::String(s) => {
+            let chars = s.chars().rev().collect::<Vec<_>>();
+            operands.push(Operand::String(String::from_iter(chars)))
+        }
+        Operand::Integer(mut int) => {
+            let mut reversed = 0;
+            while int != 0 {
+                reversed <<= 8;
+                reversed += int & 0xFF;
+                int >>= 8;
+            }
+            operands.push(Operand::Integer(reversed))
+        }
+        _ => Err(Error::InvalidDataType {
+            expected: vec![OperandType::String, OperandType::Integer],
+            got: operand.data_type(),
+        })?,
+    }
 
     Ok(())
 }
