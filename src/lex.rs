@@ -1,24 +1,8 @@
 use logos::{Lexer, Logos};
 
-use std::{
-    num::{ParseFloatError, ParseIntError},
-    str::FromStr as _,
-};
+use std::str::FromStr as _;
 
-use crate::{Float, Integer};
-
-#[derive(Debug, thiserror::Error, PartialEq, Eq, Clone, Default)]
-pub enum Error {
-    #[error("{0}")]
-    ParseIntError(#[from] ParseIntError),
-    #[error("{0}")]
-    ParseFloatError(#[from] ParseFloatError),
-    #[error("Invalid bit width hint: {0}")]
-    InvalidBitWidthHint(String),
-    #[error("Invalid token")]
-    #[default]
-    Invalid,
-}
+use crate::{Error, Float, Integer};
 
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\n\f]+")]
@@ -91,6 +75,14 @@ impl LexToken {
     }
 }
 
+pub fn tokenize(formula: &str) -> Result<Vec<LexToken>, Error> {
+    let lexer = LexToken::lexer(formula);
+    Ok(lexer
+        .collect::<Result<Vec<_>, Error>>()?
+        .into_iter()
+        .collect())
+}
+
 fn dec_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
     let mut token = lex.slice();
     let unit = if let Some(remain) = token.strip_suffix(['k', 'K']) {
@@ -119,21 +111,21 @@ fn dec_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
 fn hex_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
     lex.slice()
         .strip_prefix("0x")
-        .ok_or(Error::Invalid)
+        .ok_or(Error::InvalidToken)
         .and_then(|s| Integer::from_str_radix(s, 16).map_err(Error::from))
 }
 
 fn oct_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
     lex.slice()
         .strip_prefix("0o")
-        .ok_or(Error::Invalid)
+        .ok_or(Error::InvalidToken)
         .and_then(|s| Integer::from_str_radix(s, 8).map_err(Error::from))
 }
 
 fn bin_number(lex: &mut Lexer<LexToken>) -> Result<Integer, Error> {
     lex.slice()
         .strip_prefix("0b")
-        .ok_or(Error::Invalid)
+        .ok_or(Error::InvalidToken)
         .and_then(|s| Integer::from_str_radix(s, 2).map_err(Error::from))
 }
 
@@ -144,7 +136,7 @@ fn store_identifier(lex: &mut Lexer<LexToken>) -> Option<String> {
 fn bit_width(lex: &mut Lexer<LexToken>) -> Result<usize, Error> {
     lex.slice()
         .strip_suffix(['^', '~', '!'])
-        .ok_or(Error::Invalid)
+        .ok_or(Error::InvalidToken)
         .and_then(|s| match s {
             "b" => Ok(8),
             "w" => Ok(16),
@@ -164,8 +156,8 @@ fn store_string(lex: &mut Lexer<LexToken>) -> Result<String, Error> {
     Ok(lex
         .slice()
         .strip_prefix(['\'', '"'])
-        .ok_or(Error::Invalid)?
+        .ok_or(Error::InvalidToken)?
         .strip_suffix(['\'', '"'])
-        .ok_or(Error::Invalid)?
+        .ok_or(Error::InvalidToken)?
         .to_string())
 }

@@ -1,5 +1,5 @@
 use anyhow::Context;
-use cal::eval;
+use cal::Evaluator;
 use clap::{command, Arg, ArgAction, ArgGroup, ArgMatches};
 
 fn get_args() -> ArgMatches {
@@ -65,7 +65,8 @@ fn main() -> anyhow::Result<()> {
         .map(String::as_str)
         .collect::<Vec<_>>()
         .join(" ");
-    let result = eval(&expr, None)?;
+    let evaluator = Evaluator::default();
+    let result = evaluator.eval(&expr)?;
     if args.get_flag("hex") {
         println!(
             "{:X}",

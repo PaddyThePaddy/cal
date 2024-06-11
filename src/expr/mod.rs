@@ -1,37 +1,12 @@
-use std::{collections::HashMap, fmt::Display};
+use std::fmt::Display;
 
-use operand::{Operand, OperandType};
-use operator::{default_handlers, Operator, OperatorAction};
+use operand::Operand;
+use operator::Operator;
 
-use crate::lex::LexToken;
+use crate::{lex::LexToken, Error};
 
 pub mod operand;
 pub mod operator;
-
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Not enough operand")]
-    NotEnoughOperand,
-    #[error("No matching handler for {op}")]
-    NoMatchingHandler { op: Operator },
-    #[error("Redundant operand: {0}")]
-    RedundantOperand(usize),
-    #[error("Invalid data type: expected {expected:?}, got {got}")]
-    InvalidDataType {
-        expected: Vec<OperandType>,
-        got: OperandType,
-    },
-    #[error("{0}")]
-    Custom(String),
-    #[error("Expect operator, got {0:?}")]
-    ExpectOperator(LexToken),
-    #[error("Expect operand, got {0:?}")]
-    ExpectOperand(LexToken),
-    #[error("Expect {0:?}, got {1:?}")]
-    ExpectToken(LexToken, LexToken),
-    #[error("Expression ends unexpectedly")]
-    UnexpectedEnd,
-}
 
 #[derive(Debug, Clone)]
 pub enum ExprToken {
@@ -171,7 +146,7 @@ pub fn parse_para(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
         .split(|tk| *tk == LexToken::Comma)
         .try_for_each(|para_tk| {
             ret_list.extend(parse_expr(&mut para_tk.into())?);
-            Ok(())
+            Ok::<_, Error>(())
         })?;
 
     Ok(ret_list)
@@ -212,44 +187,6 @@ pub fn to_suffix(src: &[ExprToken]) -> Vec<ExprToken> {
         list.push(ExprToken::Operator(op));
     }
     list
-}
-
-pub struct Evaluator {
-    operators: HashMap<Operator, OperatorAction>,
-}
-
-impl Default for Evaluator {
-    fn default() -> Self {
-        let operators = HashMap::from_iter(default_handlers());
-        Self { operators }
-    }
-}
-
-impl Evaluator {
-    pub fn insert_op_handler(&mut self, op: Operator, handler: OperatorAction) {
-        self.operators.insert(op, handler);
-    }
-
-    pub fn eval(&self, expr: &[ExprToken]) -> Result<Operand, Error> {
-        let mut operands = vec![];
-        for token in expr {
-            match token {
-                ExprToken::Operand(op) => operands.push(op.clone()),
-                ExprToken::Operator(op) => self
-                    .operators
-                    .get(op)
-                    .ok_or(Error::NoMatchingHandler { op: op.clone() })?(
-                    &mut operands
-                )?,
-            }
-        }
-
-        if operands.len() != 1 {
-            Err(Error::RedundantOperand(operands.len()))?;
-        }
-
-        operands.into_iter().last().ok_or(Error::NotEnoughOperand)
-    }
 }
 
 pub fn print_tokens(tokens: &[ExprToken]) {
