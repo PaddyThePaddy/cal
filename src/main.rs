@@ -1,5 +1,5 @@
 use anyhow::Context;
-use cal::Evaluator;
+use cal::{expr::operand::Operand, Evaluator};
 use clap::{Args, Parser};
 
 /// A cli calculator
@@ -75,7 +75,7 @@ fn main() -> anyhow::Result<()> {
     } else if args.format.bin {
         let num = result.as_int().with_context(|| {
             format!(
-                "--hex flag requires the result of the expression to be integer. Got {result:?}",
+                "--bin flag requires the result of the expression to be integer. Got {result:?}",
             )
         })?;
         if args.pretty == 0 {
@@ -100,7 +100,7 @@ fn main() -> anyhow::Result<()> {
     } else if args.format.oct {
         let num = result.as_int().with_context(|| {
             format!(
-                "--hex flag requires the result of the expression to be integer. Got {result:?}",
+                "--oct flag requires the result of the expression to be integer. Got {result:?}",
             )
         })?;
         if args.pretty == 0 {
@@ -143,28 +143,28 @@ fn main() -> anyhow::Result<()> {
         })?;
         println!("{result:e}");
     } else {
-        let num = result.as_int().with_context(|| {
-            format!(
-                "--hex flag requires the result of the expression to be integer. Got {result:?}",
-            )
-        })?;
+        match result {
+            Operand::Float(f) => println!("{f}"),
+            Operand::String(s) => println!("{s}"),
+            Operand::Integer(num) => {
+                if args.pretty == 0 {
+                    println!("{num}");
+                } else {
+                    let num_str = format!("{num}");
+                    let mut str_sections = vec![];
+                    if num_str.len() % 3 != 0 {
+                        str_sections.push(&num_str[0..num_str.len() % 3]);
+                    }
+                    for (s, e) in (num_str.len() % 3..num_str.len())
+                        .step_by(3)
+                        .map(|s| (s, s + 3))
+                    {
+                        str_sections.push(&num_str[s..e]);
+                    }
 
-        if args.pretty == 0 {
-            println!("{num}");
-        } else {
-            let num_str = format!("{num}");
-            let mut str_sections = vec![];
-            if num_str.len() % 3 != 0 {
-                str_sections.push(&num_str[0..num_str.len() % 3]);
+                    println!("{}", str_sections.join(","));
+                }
             }
-            for (s, e) in (num_str.len() % 3..num_str.len())
-                .step_by(3)
-                .map(|s| (s, s + 3))
-            {
-                str_sections.push(&num_str[s..e]);
-            }
-
-            println!("{}", str_sections.join(","));
         }
     }
 
