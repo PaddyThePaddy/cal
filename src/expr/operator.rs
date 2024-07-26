@@ -25,7 +25,7 @@ pub enum Operator {
     RightShift,
     LeftShift,
     Negate,
-    Postive,
+    Positive,
 }
 
 impl TryFrom<LexToken> for Operator {
@@ -56,7 +56,7 @@ impl Operator {
     /// unary operators should have a precedence 0
     pub fn precedence(&self) -> usize {
         match self {
-            Self::Custom(_) | Self::BitNot(_) | Self::Negate | Self::Postive => 0,
+            Self::Custom(_) | Self::BitNot(_) | Self::Negate | Self::Positive => 0,
             Self::Expo => 2,
             Self::Mul | Self::Div | Self::Mod => 3,
             Self::Add | Self::Minus => 4,
@@ -88,7 +88,7 @@ impl Display for Operator {
             Operator::RightShift => write!(f, ">>"),
             Operator::LeftShift => write!(f, "<<"),
             Operator::Negate => write!(f, "-"),
-            Operator::Postive => write!(f, "+"),
+            Operator::Positive => write!(f, "+"),
         }
     }
 }
@@ -119,7 +119,7 @@ pub fn default_handlers() -> Vec<(Operator, OperatorAction)> {
         (Operator::Custom("ascii".to_string()), Box::new(ascii)),
         (Operator::Custom("rev".to_string()), Box::new(rev)),
         (Operator::Negate, Box::new(neg)),
-        (Operator::Postive, Box::new(noop)),
+        (Operator::Positive, Box::new(noop)),
     ]
 }
 

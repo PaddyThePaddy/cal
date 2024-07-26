@@ -33,7 +33,7 @@ struct PrintFormat {
     /// (the result of the expression must be integer)
     #[arg(long, short)]
     bin: bool,
-    /// Print floating point number with scienfic notation
+    /// Print floating point number with scientific notation
     #[arg(long, short)]
     exp: bool,
     /// Output list of 1 bits in the result

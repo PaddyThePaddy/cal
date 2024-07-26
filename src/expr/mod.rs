@@ -84,7 +84,7 @@ pub fn parse_expr(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
                     ret_list.push(ExprToken::Operator(Operator::Negate));
                 }
                 LexToken::Plus => {
-                    ret_list.push(ExprToken::Operator(Operator::Postive));
+                    ret_list.push(ExprToken::Operator(Operator::Positive));
                 }
                 LexToken::BitNot(width) => {
                     ret_list.push(ExprToken::Operator(Operator::BitNot(width)));
@@ -126,21 +126,21 @@ pub fn parse_para(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
     }
 
     let mut ret_list = vec![];
-    let mut parenthsis_lvl = 0;
+    let mut parenthesis_lvl = 0;
     let mut para_list = vec![];
     loop {
         let token = tokens.next().ok_or(Error::UnexpectedEnd)?;
         match token {
             LexToken::CloseParenthesis => {
-                if parenthsis_lvl == 0 {
+                if parenthesis_lvl == 0 {
                     break;
                 } else {
-                    parenthsis_lvl -= 1;
+                    parenthesis_lvl -= 1;
                     para_list.push(token);
                 }
             }
             LexToken::OpenParenthesis => {
-                parenthsis_lvl += 1;
+                parenthesis_lvl += 1;
                 para_list.push(token);
             }
             _ => para_list.push(token),

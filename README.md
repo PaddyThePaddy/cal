@@ -1,5 +1,5 @@
 [![Rust](https://github.com/PaddyThePaddy/cal/actions/workflows/rust.yml/badge.svg)](https://github.com/PaddyThePaddy/cal/actions/workflows/rust.yml)  
-A cli caculator for myself (mostly firmware programming scenario)
+A cli calculator for myself (mostly firmware programming scenario)
 
 # Example
 `cal "2+(1-5)*3/4"`  
@@ -17,7 +17,7 @@ Outputs _FVH
 # Input format
 Number literals in the expression accepts following format:
 - Decimal numbers
-- Hexdecimal numbers with leading `0x`
+- Hexadecimal numbers with leading `0x`
 - Octal numbers with leading `0o`
 - Binary number with leading `0b`
 - Floating point numbers in scientific notation
@@ -57,7 +57,7 @@ Number literals in the expression accepts following format:
 | rev   | Reverse bytes in an integer or characters in an string                                      |
 
 # Multiple shortcuts
-Adding character k, m, g, t, p after a decimal integer multiplys its value.
+Adding character k, m, g, t, p after a decimal integer multiply its value.
 
 | Shortcut | Multiple                |
 | -------- | ----------------------- |
