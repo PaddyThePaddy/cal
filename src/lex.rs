@@ -55,6 +55,8 @@ pub enum LexToken {
     #[regex(r#""([^"]|\\")*""#, store_string)]
     #[regex(r#"'([^']|\\')*'"#, store_string)]
     String(String),
+    #[regex(r"(?i)bit\d+", bit_number)]
+    Bit(Integer),
 }
 
 impl LexToken {
@@ -160,4 +162,8 @@ fn store_string(lex: &mut Lexer<LexToken>) -> Result<String, Error> {
         .strip_suffix(['\'', '"'])
         .ok_or(Error::InvalidToken)?
         .to_string())
+}
+
+fn bit_number(bit_number: &mut Lexer<LexToken>) -> Result<Integer, Error> {
+    Ok(bit_number.slice()[3..].parse()?)
 }

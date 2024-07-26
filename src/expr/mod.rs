@@ -104,6 +104,10 @@ pub fn parse_expr(tokens: &mut LexTokenIter) -> Result<Vec<ExprToken>, Error> {
                     ret_list.push(ExprToken::Operand(Operand::String(s)));
                     parse_state = ParseState::Operator;
                 }
+                LexToken::Bit(n) => {
+                    ret_list.push(ExprToken::Operand(Operand::Integer(1 << n)));
+                    parse_state = ParseState::Operator;
+                }
                 _ => Err(Error::ExpectOperand(token.clone()))?,
             },
         }

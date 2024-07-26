@@ -66,3 +66,6 @@ Adding character k, m, g, t, p after a decimal integer multiplys its value.
 | g        | 1024m, 1073741824       |
 | t        | 1024g, 1099511627776    |
 | p        | 1024t, 1125899906842624 |
+
+# Bit shortcuts
+`bit#` converts into `1 << #`, like `bit3` equals `8`
