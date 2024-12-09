@@ -1,5 +1,5 @@
 use anyhow::Context;
-use cal::{expr::operand::Operand, Evaluator};
+use rcal::{expr::operand::Operand, Evaluator};
 use clap::{Args, Parser};
 
 /// A cli calculator
